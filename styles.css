@@ -142,15 +142,27 @@ button:disabled {
   cursor: not-allowed;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 :where(a, button, canvas, [tabindex]):focus-visible {
   outline: 3px solid var(--g-blue);
   outline-offset: 3px;
+}
+
+#game-canvas:focus-visible {
+  outline-offset: -3px;
 }
 
 @media (forced-colors: active) {
   :where(a, button, canvas, [tabindex]):focus-visible {
     outline: 3px solid Highlight;
     outline-offset: 3px;
+  }
+
+  #game-canvas:focus-visible {
+    outline-offset: -3px;
   }
 }
 

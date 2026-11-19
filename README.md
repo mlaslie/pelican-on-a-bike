@@ -4,6 +4,14 @@
 
 A zero-build, Chrome Dino–inspired endless and World Tour runner featuring an animated vector pelican riding a 4-color Google GBike through realistic multi-layer parallax scenes of global Google campuses.
 
+## Screenshots
+
+### Mountain View — Bay View & Googleplex
+![Pelican jumping over an Android statue in front of Google Bay View and Googleplex](screenshots/mountain-view.png)
+
+### Tokyo — Shibuya Stream & Gemini Invincibility
+![Pelican riding with Gemini invincibility aura past Shibuya Stream, Yamanote Line train, Mt. Fuji, and Google G collectibles](screenshots/tokyo-powerup.png)
+
 ## Campuses Included
 1. **Mountain View, CA** (`0–350 pts`) — Bay View dragonscale solar canopy, Googleplex, Stan the T-Rex skeleton, and 4-color umbrellas
 2. **London, UK** (`350–700 pts`) — King's Cross KGX1 Landscraper with rooftop greenery, St Pancras clocktower, and red double-decker bus
