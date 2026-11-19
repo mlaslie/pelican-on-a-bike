@@ -425,19 +425,8 @@
       if (e.detail > 0) canvas.focus();
     });
 
-    // Easter Egg: Every 5 Bike Bell rings reveals the next Secret Level one at a time
-    let bellEasterCount = 0;
-    function handleBellRing() {
-      engine.ringBell();
-      bellEasterCount += 1;
-      if (bellEasterCount % 5 === 0 && engine.secretUnlockCount < 3) {
-        engine.unlockNextSecret(true);
-        announce('New secret level unlocked!');
-      }
-    }
-
     btnBell.addEventListener('click', function (e) {
-      handleBellRing();
+      engine.ringBell();
       if (e.detail > 0) canvas.focus();
     });
 
@@ -619,7 +608,7 @@
 
       if (code === 'KeyB') {
         e.preventDefault();
-        handleBellRing();
+        engine.ringBell();
         return;
       }
 

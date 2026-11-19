@@ -9,7 +9,6 @@
   const HI_GOOGLER_KEY = 'pelicanBikeHighScoreGoogler';
   const HI_NOOGLER_KEY = 'pelicanBikeHighScoreNoogler';
   const SPEED_MODE_KEY = 'pelicanBikeSpeedMode';
-  const SECRET_LEVEL_KEY = 'pelicanBikeSecretLevel';
   const NOOGLER_SPEED = 380;
   const GOOGLER_START_SPEED = 370;
   const GOOGLER_TOUR_MAX_SPEED = 720;
@@ -83,10 +82,9 @@
         if (!Number.isNaN(storedN) && storedN > 0) {
           this.highScores.noogler = storedN;
         }
-        const storedSecret = parseInt(global.localStorage.getItem(SECRET_LEVEL_KEY) || '0', 10);
-        if (!Number.isNaN(storedSecret) && storedSecret > 0) {
-          this.secretUnlockCount = clamp(storedSecret, 0, 3);
-        }
+        // Keep secret level unlocks session-only (clear any legacy stored keys on refresh)
+        global.localStorage.removeItem('pelicanBikeSecretLevel');
+        global.localStorage.removeItem('pelicanBikeSecretsUnlocked');
       } catch (_) {}
 
       this.highScore = this.highScores[this.speedMode];
@@ -229,9 +227,6 @@
       const target = clamp(levelCount || 0, 0, 3);
       if (target <= this.secretUnlockCount) return false;
       this.secretUnlockCount = target;
-      try {
-        global.localStorage.setItem(SECRET_LEVEL_KEY, String(this.secretUnlockCount));
-      } catch (_) {}
       if (showToast) {
         const names = ['', 'Lvl 7 · The Cloud (TPU Data Center)', 'Lvl 8 · Google X → The Moon', 'Lvl 9 · Chrome Dino Desert'];
         this.Audio.playMilestone();
