@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pelican on a Bike — Google Campus World Tour</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="js/audio.js"></script>
+  <script defer src="js/campuses.js"></script>
+  <script defer src="js/pelican.js"></script>
+  <script defer src="js/obstacles.js"></script>
+  <script defer src="js/powerups.js"></script>
+  <script defer src="js/engine.js"></script>
+  <script defer src="js/main.js"></script>
+</head>
+<body>
+  <div class="google-top-bar" aria-hidden="true">
+    <span class="gbar-blue"></span>
+    <span class="gbar-red"></span>
+    <span class="gbar-yellow"></span>
+    <span class="gbar-green"></span>
+  </div>
+
+  <div class="app-shell">
+    <header class="site-header">
+      <div class="brand-block">
+        <div class="brand-title-row">
+          <svg class="brand-icon" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+            <circle cx="9" cy="22" r="5.5" fill="none" stroke="#4285F4" stroke-width="2.2"/>
+            <circle cx="23" cy="22" r="5.5" fill="none" stroke="#34A853" stroke-width="2.2"/>
+            <path d="M9 22 L15 14 L23 22 M15 14 L20 14 L23 22" fill="none" stroke="#EA4335" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 10 C19 6 24 6 26 8 L29 9.5 L24.5 11.2 C22.5 11.8 19.5 11.5 18 10 Z" fill="#FBBC04"/>
+            <circle cx="15" cy="11" r="3" fill="#ffffff" stroke="#202124" stroke-width="1.3"/>
+            <circle cx="20.5" cy="8.2" r="1.8" fill="#ffffff" stroke="#202124" stroke-width="1.2"/>
+          </svg>
+          <h1>Pelican on a Bike</h1>
+          <span class="benchmark-pill">svg_benchmark // world tour</span>
+        </div>
+        <p class="subtitle">Chrome Dino–inspired dash across global Google campuses</p>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Game controls">
+        <button id="btn-bell" type="button" class="tool-btn">
+          <svg class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M12 4a6 6 0 0 0-6 6c0 4.5-2 6-2 6h16s-2-1.5-2-6a6 6 0 0 0-6-6Zm0 16a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 20Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+          <span>Bell</span>
+          <kbd class="key-hint" aria-hidden="true">B</kbd>
+        </button>
+
+        <button id="btn-pause" type="button" class="tool-btn" disabled>
+          <svg id="icon-pause" class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+            <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+          </svg>
+          <svg id="icon-play" class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" hidden>
+            <polygon points="7,5 19,12 7,19" fill="currentColor"/>
+          </svg>
+          <span id="btn-pause-label">Pause</span>
+        </button>
+
+        <button id="btn-sound" type="button" class="tool-btn" aria-pressed="true">
+          <svg id="icon-sound-on" class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M4 10v4h4l5 4V6l-5 4H4Z" fill="currentColor"/>
+            <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg id="icon-sound-off" class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" hidden>
+            <path d="M4 10v4h4l5 4V6l-5 4H4Z" fill="currentColor"/>
+            <path d="M16 9l5 6m0-6-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Sound</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="stage-card" aria-label="Game Stage">
+        <div class="stage-hud">
+          <div class="hud-campus">
+            <span id="hud-campus-dot" class="campus-dot" aria-hidden="true"></span>
+            <span id="hud-campus-name" class="hud-campus-name">Mountain View, CA</span>
+            <span class="hud-sep" aria-hidden="true">·</span>
+            <span id="hud-campus-landmark" class="hud-campus-landmark">Bay View &amp; Googleplex</span>
+          </div>
+
+          <div class="hud-right">
+            <div class="hud-powerups">
+              <div id="hud-gemini-pill" class="gemini-pill" hidden aria-live="off">
+                <svg class="gemini-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                  <path d="M12 2 Q12 12 22 12 Q12 12 12 22 Q12 12 2 12 Q12 12 12 2 Z" fill="currentColor"/>
+                </svg>
+                <span id="hud-gemini-time">INVINCIBLE 6.0s</span>
+              </div>
+
+              <div id="hud-g-tracker" class="g-tracker" aria-label="Google G logos collected toward Free Continue">
+                <span class="g-pip" data-pip="1" aria-hidden="true">G</span>
+                <span class="g-pip" data-pip="2" aria-hidden="true">G</span>
+                <span class="g-pip" data-pip="3" aria-hidden="true">G</span>
+                <span id="hud-continue-badge" class="continue-badge" hidden>CONTINUE ×1</span>
+              </div>
+            </div>
+
+            <span id="hud-mode-badge" class="mode-badge" data-mode="tour">WORLD TOUR</span>
+            <div class="score-readout" aria-label="Score">
+              <span class="hi-label">HI</span>
+              <span id="hud-hi-score" class="score-digits">00000</span>
+              <span id="hud-score" class="score-digits current-score">00000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas
+            id="game-canvas"
+            width="960"
+            height="340"
+            tabindex="0"
+            role="application"
+            aria-label="Pelican on a Bike game canvas. Press Space or Up Arrow to jump, Down Arrow to duck, P to pause."
+          ></canvas>
+
+          <div id="overlay-start" class="stage-overlay">
+            <div class="overlay-card overlay-card-compact">
+              <p class="overlay-kicker">CHROME DINO // GLOBAL CAMPUS RUN</p>
+              <h2 class="overlay-title">Ready to pedal the World Tour?</h2>
+              <p class="overlay-desc">
+                Jump over obstacles, duck under birds &amp; drones, grab <strong>Gemini sparkles</strong> for 6s invincibility, and collect <strong>3× Google G logos</strong> for a Free Continue from where you crash.
+              </p>
+              <div class="overlay-actions">
+                <button id="btn-start-tour" type="button" class="primary-btn">
+                  Start Tour <kbd class="btn-kbd" aria-hidden="true">Space</kbd>
+                </button>
+              </div>
+              <p class="overlay-hint">Press Space, Up Arrow, or tap canvas to ride</p>
+            </div>
+          </div>
+
+          <div id="overlay-pause" class="stage-overlay" hidden>
+            <div class="overlay-card overlay-card-compact">
+              <p class="overlay-kicker">TOUR PAUSED</p>
+              <h2 class="overlay-title">Take a microkitchen breather</h2>
+              <div class="overlay-actions">
+                <button id="btn-resume-tour" type="button" class="primary-btn">Resume</button>
+                <button id="btn-pause-restart" type="button" class="secondary-btn">Restart Tour</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="overlay-victory" class="stage-overlay" hidden>
+            <div class="overlay-card overlay-card-wide">
+              <p class="overlay-kicker kicker-victory">WORLD TOUR COMPLETE</p>
+              <h2 class="overlay-title">4 Campuses. Zero Dropped Frames.</h2>
+              <dl class="stats-grid">
+                <div class="stat-item">
+                  <dt>Final Score</dt>
+                  <dd id="victory-score">01400</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Ride Time</dt>
+                  <dd id="victory-time">01:14</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Cleared</dt>
+                  <dd id="victory-cleared">0</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Campuses</dt>
+                  <dd id="victory-campuses">4 / 4</dd>
+                </div>
+              </dl>
+              <div class="overlay-actions">
+                <button id="btn-continue-endless" type="button" class="primary-btn">Continue Endless Mode</button>
+                <button id="btn-play-again-victory" type="button" class="secondary-btn">Play Tour Again</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="overlay-revive" class="stage-overlay" hidden>
+            <div class="overlay-card overlay-card-compact">
+              <p class="overlay-kicker kicker-revive">GOOGLE G BONUS • FREE CONTINUE</p>
+              <h2 class="overlay-title">Crash avoided — continue from here?</h2>
+              <dl class="stats-grid stats-grid-3">
+                <div class="stat-item">
+                  <dt>Score</dt>
+                  <dd id="revive-score">00000</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Campus</dt>
+                  <dd id="revive-campus">Mountain View</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Continues</dt>
+                  <dd id="revive-left">1</dd>
+                </div>
+              </dl>
+              <div class="overlay-actions">
+                <button id="btn-free-continue" type="button" class="primary-btn">
+                  Continue From Here <kbd class="btn-kbd" aria-hidden="true">Space</kbd>
+                </button>
+                <button id="btn-revive-restart" type="button" class="secondary-btn">Start Over</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="overlay-gameover" class="stage-overlay" hidden>
+            <div class="overlay-card overlay-card-compact">
+              <div class="gameover-header">
+                <p class="overlay-kicker kicker-crash">WIPEOUT</p>
+                <span id="gameover-new-hi" class="new-hi-pill" hidden>NEW HIGH SCORE</span>
+              </div>
+              <h2 class="overlay-title">Feather ruffling crash!</h2>
+              <dl class="stats-grid stats-grid-3">
+                <div class="stat-item">
+                  <dt>Score</dt>
+                  <dd id="gameover-score">00000</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Best</dt>
+                  <dd id="gameover-best">00000</dd>
+                </div>
+                <div class="stat-item">
+                  <dt>Campus</dt>
+                  <dd id="gameover-campus">Mountain View</dd>
+                </div>
+              </dl>
+              <div class="overlay-actions">
+                <button id="btn-restart" type="button" class="primary-btn">
+                  Ride Again <kbd class="btn-kbd" aria-hidden="true">Space</kbd>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="route-tracker">
+          <div class="route-track-wrap">
+            <div
+              id="tour-progress"
+              class="route-progressbar"
+              role="progressbar"
+              aria-label="World Tour progress"
+              aria-valuemin="0"
+              aria-valuemax="1400"
+              aria-valuenow="0"
+            >
+              <div id="tour-progress-fill" class="route-fill"></div>
+            </div>
+            <div class="route-stops" aria-hidden="true">
+              <span class="route-stop" data-stop="mountain-view" style="left: 0%">
+                <span class="stop-dot"></span>
+                <span class="stop-text">MTV · 0</span>
+              </span>
+              <span class="route-stop" data-stop="london" style="left: 25%">
+                <span class="stop-dot"></span>
+                <span class="stop-text">LDN · 350</span>
+              </span>
+              <span class="route-stop" data-stop="tokyo" style="left: 50%">
+                <span class="stop-dot"></span>
+                <span class="stop-text">TYO · 700</span>
+              </span>
+              <span class="route-stop" data-stop="zurich" style="left: 75%">
+                <span class="stop-dot"></span>
+                <span class="stop-text">ZRH · 1050</span>
+              </span>
+              <span class="route-stop route-stop-finish" style="left: 100%">
+                <span class="stop-flag">FINISH · 1400</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="picker-section" aria-labelledby="picker-heading">
+        <div class="picker-header">
+          <h2 id="picker-heading">Campus Jump Picker — Quick Evaluation</h2>
+          <p class="picker-note">Jump straight into any campus backdrop to inspect landmarks, lighting, and local obstacles.</p>
+        </div>
+
+        <div class="campus-picker" role="group" aria-label="Campus Jump Picker">
+          <button type="button" class="campus-pill" data-campus="mountain-view" aria-current="true">
+            <span class="pill-swatch pill-blue" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">Mountain View</span>
+              <span class="pill-landmark">Bay View &amp; Googleplex</span>
+            </span>
+            <span class="pill-range">0 pts</span>
+          </button>
+
+          <button type="button" class="campus-pill" data-campus="london">
+            <span class="pill-swatch pill-red" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">London</span>
+              <span class="pill-landmark">King's Cross Landscraper</span>
+            </span>
+            <span class="pill-range">350 pts</span>
+          </button>
+
+          <button type="button" class="campus-pill" data-campus="tokyo">
+            <span class="pill-swatch pill-yellow" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">Tokyo</span>
+              <span class="pill-landmark">Shibuya Stream</span>
+            </span>
+            <span class="pill-range">700 pts</span>
+          </button>
+
+          <button type="button" class="campus-pill" data-campus="zurich">
+            <span class="pill-swatch pill-green" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">Zurich</span>
+              <span class="pill-landmark">Hürlimann Areal</span>
+            </span>
+            <span class="pill-range">1050 pts</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="touch-controls" aria-label="Touch controls">
+        <button id="btn-touch-duck" type="button" class="touch-btn touch-duck">
+          <span aria-hidden="true">↓</span> DUCK / FAST-FALL
+        </button>
+        <button id="btn-touch-jump" type="button" class="touch-btn touch-jump">
+          <span aria-hidden="true">↑</span> JUMP
+        </button>
+      </div>
+
+      <div id="sr-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    </main>
+
+    <footer class="site-footer">
+      <ul class="shortcuts-list">
+        <li><kbd>Space</kbd> / <kbd>↑</kbd> Jump &amp; Start</li>
+        <li><kbd>↓</kbd> Duck &amp; Fast-fall</li>
+        <li><kbd>B</kbd> Bike Bell</li>
+        <li><kbd>P</kbd> Pause</li>
+        <li><kbd>M</kbd> Mute Sound</li>
+      </ul>
+    </footer>
+  </div>
+</body>
+</html>
