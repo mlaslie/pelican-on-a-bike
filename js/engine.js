@@ -5,7 +5,14 @@
   const STAGE_H = 340;
   const GROUND_Y = 282;
   const SCORE_RATE = 0.048;
-  const HIGH_SCORE_KEY = 'pelicanBikeHighScore';
+  const LEGACY_HIGH_SCORE_KEY = 'pelicanBikeHighScore';
+  const HI_GOOGLER_KEY = 'pelicanBikeHighScoreGoogler';
+  const HI_NOOGLER_KEY = 'pelicanBikeHighScoreNoogler';
+  const SPEED_MODE_KEY = 'pelicanBikeSpeedMode';
+  const NOOGLER_SPEED = 380;
+  const GOOGLER_START_SPEED = 370;
+  const GOOGLER_TOUR_MAX_SPEED = 720;
+  const GOOGLER_ENDLESS_MAX_SPEED = 880;
   const GEMINI_DURATION = 6.0;
   const REVIVE_SHIELD_DURATION = 2.2;
 
@@ -29,21 +36,21 @@
       this.obstacles = new this.ObstaclesMod.ObstacleManager();
       this.powerups = new this.PowerupsMod.PowerupManager();
 
-      this.state = 'idle'; // 'idle' | 'playing' | 'paused' | 'revive' | 'victory' | 'gameover'
+      this.state = 'idle'; // 'idle' | 'playing' | 'paused' | 'respawn-unlocked' | 'revive' | 'victory' | 'gameover'
       this.score = 0;
       this.runPoints = 0;
       this.runTime = 0;
       this.worldDist = 0;
-      this.speed = 360;
       this.timeSec = 0;
       this.endlessMode = false;
       this.isPreview = false;
-      this.startCampusId = 'mountain-view';
-      this.lastCampusId = 'mountain-view';
-      this.visitedCampuses = new Set(['mountain-view']);
+      this.startCampusId = 'sydney';
+      this.lastCampusId = 'sydney';
+      this.visitedCampuses = new Set(['sydney']);
       this.lastMilestoneBucket = 0;
       this.gameOverTimestamp = 0;
       this.reviveTimestamp = 0;
+      this.respawnSplashTimestamp = 0;
       this.isNewHighScore = false;
       this.invincibleTimer = 0;
       this.reviveShieldTimer = 0;
@@ -51,15 +58,30 @@
       this.freeContinues = 0;
       this._lastHudInvincibleBucket = -1;
 
-      this.highScore = 0;
+      this.speedMode = 'googler';
+      this.highScores = { googler: 0, noogler: 0 };
       try {
-        const stored = parseInt(global.localStorage.getItem(HIGH_SCORE_KEY) || '0', 10);
-        if (!Number.isNaN(stored) && stored > 0) {
-          this.highScore = stored;
+        const savedMode = global.localStorage.getItem(SPEED_MODE_KEY);
+        if (savedMode === 'noogler' || savedMode === 'googler') {
+          this.speedMode = savedMode;
         }
-      } catch (_) {
-        this.highScore = 0;
-      }
+        const legacy = parseInt(global.localStorage.getItem(LEGACY_HIGH_SCORE_KEY) || '0', 10);
+        const storedG = global.localStorage.getItem(HI_GOOGLER_KEY);
+        if (storedG !== null) {
+          const parsedG = parseInt(storedG, 10);
+          if (!Number.isNaN(parsedG) && parsedG > 0) this.highScores.googler = parsedG;
+        } else if (!Number.isNaN(legacy) && legacy > 0) {
+          this.highScores.googler = legacy;
+          global.localStorage.setItem(HI_GOOGLER_KEY, String(legacy));
+        }
+        const storedN = parseInt(global.localStorage.getItem(HI_NOOGLER_KEY) || '0', 10);
+        if (!Number.isNaN(storedN) && storedN > 0) {
+          this.highScores.noogler = storedN;
+        }
+      } catch (_) {}
+
+      this.highScore = this.highScores[this.speedMode];
+      this.speed = this.computeSpeed();
 
       this.particles = [];
       this.toast = null;
@@ -113,12 +135,25 @@
       this.rafId = global.requestAnimationFrame(tick);
     }
 
+    setSpeedMode(mode) {
+      const nextMode = mode === 'noogler' ? 'noogler' : 'googler';
+      if (this.speedMode === nextMode) return;
+      this.speedMode = nextMode;
+      this.highScore = this.highScores[this.speedMode] || 0;
+      this.speed = this.computeSpeed();
+      try {
+        global.localStorage.setItem(SPEED_MODE_KEY, this.speedMode);
+      } catch (_) {}
+      this.emitHud(true);
+      this.emitState();
+    }
+
     startTour(campusId) {
-      const targetId = campusId || 'mountain-view';
+      const targetId = campusId || 'sydney';
       const campus = this.Campuses.getCampusById(targetId);
 
       this.startCampusId = campus.id;
-      this.isPreview = campus.id !== 'mountain-view';
+      this.isPreview = campus.id !== 'sydney';
       this.endlessMode = false;
       this.score = campus.startScore;
       this.runPoints = 0;
@@ -152,7 +187,7 @@
       this.state = 'playing';
       this.toast = {
         kicker: 'ENDLESS MODE UNLOCKED',
-        title: 'Keep pedaling — speed & weather ramp up!',
+        title: 'Keep pedaling — speed & difficulty ramp up!',
         color: '#34A853',
         timer: 2.6,
         duration: 2.6
@@ -167,8 +202,14 @@
 
     jumpPress() {
       if (this.state === 'idle') {
-        this.startTour('mountain-view');
+        this.startTour('sydney');
         this.pelican.pressJump();
+        return;
+      }
+      if (this.state === 'respawn-unlocked') {
+        if (performance.now() - this.respawnSplashTimestamp > 320) {
+          this.dismissRespawnSplash();
+        }
         return;
       }
       if (this.state === 'revive') {
@@ -231,12 +272,15 @@
     }
 
     computeSpeed() {
+      if (this.speedMode === 'noogler') {
+        return NOOGLER_SPEED;
+      }
       if (!this.endlessMode) {
         const progress = clamp(this.score / this.Campuses.TOUR_FINISH, 0, 1);
-        return 360 + progress * 200; // 360 -> 560 px/s
+        return GOOGLER_START_SPEED + progress * (GOOGLER_TOUR_MAX_SPEED - GOOGLER_START_SPEED);
       }
       const extra = Math.max(0, this.score - this.Campuses.TOUR_FINISH);
-      return Math.min(720, 560 + extra * 0.085);
+      return Math.min(GOOGLER_ENDLESS_MAX_SPEED, GOOGLER_TOUR_MAX_SPEED + extra * 0.065);
     }
 
     showCampusToast(campus) {
@@ -412,14 +456,25 @@
       this.emitState();
     }
 
+    dismissRespawnSplash() {
+      if (this.state !== 'respawn-unlocked') return;
+      this.reviveShieldTimer = Math.max(this.reviveShieldTimer, 0.8);
+      this.pelican.setShieldState(this.invincibleTimer, this.reviveShieldTimer);
+      this.state = 'playing';
+      this.emitHud(true);
+      this.emitState();
+    }
+
     saveHighScoreIfEligible() {
       if (this.isPreview) return;
       const floored = Math.floor(this.score);
       if (floored > this.highScore) {
         this.highScore = floored;
+        this.highScores[this.speedMode] = floored;
         this.isNewHighScore = true;
         try {
-          global.localStorage.setItem(HIGH_SCORE_KEY, String(this.highScore));
+          const key = this.speedMode === 'noogler' ? HI_NOOGLER_KEY : HI_GOOGLER_KEY;
+          global.localStorage.setItem(key, String(this.highScore));
         } catch (_) {}
       }
     }
@@ -454,7 +509,7 @@
         return;
       }
 
-      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive') {
+      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive' || this.state === 'respawn-unlocked') {
         this.pelican.update(dt, 0, false, false);
         return;
       }
@@ -528,6 +583,8 @@
         }
       }
 
+      const difficulty = (activeCampus.difficulty || 1) + (this.endlessMode && campusState.cycleIndex > 0 ? 1 : 0);
+
       this.obstacles.update(
         dt,
         this.speed,
@@ -536,11 +593,13 @@
         this.runPoints,
         this.runTime,
         this.isPreview,
-        this.endlessMode
+        this.endlessMode,
+        difficulty,
+        this.timeSec
       );
 
       const blockPowerupSpawn = this.runTime < 1.2 || (!this.endlessMode && this.score > this.Campuses.TOUR_FINISH - 55);
-      this.powerups.update(dt, this.speed, this.obstacles, blockPowerupSpawn, this.timeSec);
+      this.powerups.update(dt, this.speed, this.obstacles, blockPowerupSpawn, this.timeSec, difficulty);
 
       const collected = this.powerups.checkCollect(this.pelican.getHitbox());
       for (let c = 0; c < collected.length; c++) {
@@ -566,30 +625,31 @@
             this.gCount = 0;
             this.freeContinues += 1;
             this.Audio.playCollectG(3);
+            this.spawnConfetti(42);
             this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 38, 18, ['#4285F4', '#EA4335', '#FBBC04', '#34A853']);
-            this.toast = {
-              kicker: '3× GOOGLE G',
-              title: 'FREE CONTINUE READY!',
-              color: '#34A853',
-              timer: 2.4,
-              duration: 2.4
-            };
+            this.state = 'respawn-unlocked';
+            this.respawnSplashTimestamp = performance.now();
+            this.pelican.setDuck(false);
+            this.pelican.releaseJump();
+            this.pelican.setShieldState(this.invincibleTimer, this.reviveShieldTimer);
             if (this.callbacks.onPowerup) {
               this.callbacks.onPowerup('continue-unlocked', this.freeContinues);
             }
-          } else {
-            this.Audio.playCollectG(this.gCount);
-            this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 38, 10, ['#4285F4', '#EA4335', '#FBBC04', '#34A853']);
-            this.toast = {
-              kicker: 'GOOGLE G COLLECTED',
-              title: this.gCount + '/3 TOWARD FREE CONTINUE',
-              color: '#4285F4',
-              timer: 1.8,
-              duration: 1.8
-            };
-            if (this.callbacks.onPowerup) {
-              this.callbacks.onPowerup('google-g', this.gCount);
-            }
+            this.emitHud(true);
+            this.emitState();
+            return;
+          }
+          this.Audio.playCollectG(this.gCount);
+          this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 38, 10, ['#4285F4', '#EA4335', '#FBBC04', '#34A853']);
+          this.toast = {
+            kicker: 'GOOGLE G COLLECTED',
+            title: this.gCount + '/3 TOWARD RESPAWN',
+            color: '#4285F4',
+            timer: 1.8,
+            duration: 1.8
+          };
+          if (this.callbacks.onPowerup) {
+            this.callbacks.onPowerup('google-g', this.gCount);
           }
           this.emitHud(true);
         }
@@ -733,6 +793,8 @@
         campus: campusState.current,
         endlessMode: this.endlessMode,
         isPreview: this.isPreview,
+        speedMode: this.speedMode,
+        speed: this.speed,
         tourProgress: clamp(this.score / this.Campuses.TOUR_FINISH, 0, 1),
         gCount: this.gCount,
         freeContinues: this.freeContinues,
@@ -755,6 +817,8 @@
         campus: campusState.current,
         endlessMode: this.endlessMode,
         isPreview: this.isPreview,
+        speedMode: this.speedMode,
+        speed: this.speed,
         gCount: this.gCount,
         freeContinues: this.freeContinues,
         invincibleTimer: this.invincibleTimer,

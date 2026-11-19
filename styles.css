@@ -113,8 +113,43 @@ h1 {
 
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+}
+
+.mode-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 999px;
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  gap: 2px;
+}
+
+.mode-switch-btn {
+  border: none;
+  background-color: transparent;
+  color: var(--ink-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+  min-block-size: 32px;
+  min-inline-size: 64px;
+}
+
+.mode-switch-btn:hover:not(:disabled) {
+  box-shadow: none;
+  color: var(--ink-primary);
+  background-color: rgb(255 255 255 / 0.65);
+}
+
+.mode-switch-btn[aria-pressed="true"] {
+  background-color: var(--g-blue);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgb(26 115 232 / 0.25);
 }
 
 /* Buttons with natural interaction states: distinct hover, press, and focus-visible */
@@ -247,6 +282,24 @@ button:disabled {
 
 .hud-campus-landmark {
   color: var(--ink-secondary);
+}
+
+.diff-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background-color: #e0f7fa;
+  color: #006064;
+  border: 1px solid #b2ebf2;
+}
+
+.diff-badge-hardest {
+  background-color: #fce8e6;
+  color: #a50e0e;
+  border-color: #f6aea9;
 }
 
 .hud-right {
@@ -452,6 +505,51 @@ button:disabled {
 
 .overlay-card-wide {
   width: min(520px, 94%);
+}
+
+.overlay-card-respawn {
+  width: min(440px, 94%);
+  padding-top: 0;
+  overflow: hidden;
+  border-color: #c6dafc;
+}
+
+.respawn-top-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 5px;
+  margin: 0 -22px 14px;
+}
+
+.respawn-g-crest {
+  display: grid;
+  place-items: center;
+  margin: 0 auto 6px;
+}
+
+.respawn-count-pill {
+  display: inline-block;
+  margin: 4px 0 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #a8dab5;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .overlay-card-respawn .respawn-g-crest {
+    animation: respawn-pop 340ms ease-out both;
+  }
+}
+
+@keyframes respawn-pop {
+  0% { scale: 0.75; opacity: 0; }
+  65% { scale: 1.08; opacity: 1; }
+  100% { scale: 1; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -719,7 +817,7 @@ button:disabled {
 
 .campus-picker {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -756,6 +854,9 @@ button:disabled {
 .pill-red { background-color: #ea4335; }
 .pill-yellow { background-color: #fbbc04; }
 .pill-green { background-color: #34a853; }
+.pill-cyan { background-color: #00acc1; }
+.pill-orange { background-color: #f57c00; }
+.pill-purple { background-color: #9334e6; }
 
 .pill-meta {
   display: flex;
@@ -765,9 +866,30 @@ button:disabled {
 }
 
 .pill-city {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--ink-primary);
+}
+
+.pill-rank {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background-color: var(--bg-subtle);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.pill-rank-hardest {
+  background-color: #fce8e6;
+  color: #a50e0e;
+  border-color: #f6aea9;
 }
 
 .pill-landmark {

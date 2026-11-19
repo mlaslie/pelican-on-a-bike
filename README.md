@@ -8,23 +8,37 @@ A zero-build, Chrome Dino–inspired endless and World Tour runner featuring an 
 
 ## Screenshots
 
-### Mountain View — Bay View & Googleplex
-![Pelican jumping over an Android statue in front of Google Bay View and Googleplex](screenshots/mountain-view.png)
+### Sydney — Pyrmont & Darling Harbour (`LVL 1 · EASY`)
+![Pelican jumping over a surfboard rack in Sydney with Opera House, Harbour Bridge, and ferry](screenshots/sydney.png)
 
-### Tokyo — Shibuya Stream & Gemini Invincibility
-![Pelican riding with Gemini invincibility aura past Shibuya Stream, Yamanote Line train, Mt. Fuji, and Google G collectibles](screenshots/tokyo-powerup.png)
+### New York — Pier 57 & St. John's Terminal (`LVL 4`)
+![Pelican approaching a risky Gemini jump-arc over a coffee cart and low Google G under a swooping pigeon in New York](screenshots/new-york.png)
 
-## Campuses Included
-1. **Mountain View, CA** (`0–350 pts`) — Bay View dragonscale solar canopy, Googleplex, Stan the T-Rex skeleton, and 4-color umbrellas
-2. **London, UK** (`350–700 pts`) — King's Cross KGX1 Landscraper with rooftop greenery, St Pancras clocktower, and red double-decker bus
-3. **Tokyo, Japan** (`700–1050 pts`) — Shibuya Stream tower, elevated viaduct with Yamanote Line train, Mt. Fuji dusk silhouette, and sakura promenade
-4. **Zurich, Switzerland** (`1050–1400 pts`) — Hürlimann Areal brick brewery & chimney, snow-capped Swiss Alps alpenglow, and VBZ tram
+### Mountain View — Bay View & Googleplex (`LVL 6 · HARDEST`)
+![Pelican riding with Gemini invincibility aura past Stan T-Rex toward a double cluster in Mountain View](screenshots/mountain-view.png)
 
-Use the **Campus Jump Picker** below the stage to jump straight into any campus, or complete the **1,400-point World Tour** to unlock **Endless Mode**.
+### Respawn Unlocked Splash (`3× Google G`)
+![Google G themed Respawn Unlocked pause splash screen with stacked respawns](screenshots/respawn-unlocked.png)
+
+## Campuses Included (Ranked Easiest → Hardest)
+1. **Sydney, Australia** (`0–350 pts` · `LVL 1 · EASY`) — Pyrmont waterfront, Sydney Opera House, Harbour Bridge, and Darling Harbour ferry
+2. **Zurich, Switzerland** (`350–700 pts` · `LVL 2`) — Hürlimann Areal brick brewery & chimney, snow-capped Swiss Alps alpenglow, and VBZ tram
+3. **London, UK** (`700–1050 pts` · `LVL 3`) — King's Cross KGX1 Landscraper with rooftop greenery, St Pancras clocktower, and double-decker bus
+4. **New York, USA** (`1050–1400 pts` · `LVL 4`) — Pier 57 rooftop park, St. John's Terminal, Manhattan skyline, and NYC yellow cab
+5. **Tokyo, Japan** (`1400–1750 pts` · `LVL 5`) — Shibuya Stream tower, elevated viaduct with Yamanote Line train, Mt. Fuji dusk silhouette, and sakura promenade
+6. **Mountain View, CA** (`1750–2100 pts` · `LVL 6 · HARDEST`) — Bay View dragonscale solar canopy, Googleplex, Stan the T-Rex skeleton, and 4-color umbrellas
+
+Use the **Campus Jump Picker** below the stage to jump straight into any campus, or complete the **2,100-point World Tour** to unlock **Endless Mode**.
+
+## Speed Modes & Difficulty
+- **Googler (Default):** Chrome Dino–style continuous acceleration from `370 px/s` in Sydney up to `720 px/s` in Mountain View and `880 px/s` in Endless Mode, with separate high-score tracking.
+- **Noogler:** Steady comfortable cruise speed (`380 px/s`) throughout the tour with its own high-score board.
+- **Escalating Obstacle Patterns:** Double ground obstacle clusters (`Lvl 2+`), **Jump → Fast-Fall → Duck** combos (`Lvl 3+`), faster aerials (`1.15× → 1.34×`), and swooping birds/drones (`Lvl 4+`).
 
 ## Power-Ups
-- **Gemini Sparkle**: Grants **6.0 seconds of invincibility** with a starlight aura, smashing collided obstacles out of your path.
-- **3× Google `G` Logos**: Collect three floating `G` medallions to earn a **Free Continue**—when you hit an obstacle, resume right from that spot with your score and campus intact plus a brief safety shield.
+- **Gemini Sparkle:** Grants **6.0 seconds of invincibility** with a starlight aura and live countdown, smashing collided obstacles out of your path.
+- **3× Google `G` Logos (Stackable Respawns):** Collecting 3 medallions pauses gameplay for a **Respawn Unlocked!** splash screen and banks a respawn (`RESPAWNS ×N`, stackable without cap). On a crash, resume right from that exact spot with your score and campus intact.
+- **Progressive Risk–Reward Placement:** In harder campuses, Gemini sparkles and `G` logos increasingly spawn in bold jump arcs directly over obstacles or low-duck lanes beneath aerials.
 
 ## Controls
 - `Space` / `↑` / `W`: Jump (hold slightly longer for higher arc) & Start / Restart / Free Continue

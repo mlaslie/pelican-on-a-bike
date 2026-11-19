@@ -12,6 +12,7 @@
     const hudCampusDot = document.getElementById('hud-campus-dot');
     const hudCampusName = document.getElementById('hud-campus-name');
     const hudCampusLandmark = document.getElementById('hud-campus-landmark');
+    const hudCampusDiff = document.getElementById('hud-campus-diff');
     const hudModeBadge = document.getElementById('hud-mode-badge');
     const hudHiScore = document.getElementById('hud-hi-score');
     const hudScore = document.getElementById('hud-score');
@@ -25,6 +26,8 @@
     const campusPills = Array.from(document.querySelectorAll('.campus-pill'));
 
     // Toolbar buttons
+    const btnModeNoogler = document.getElementById('btn-mode-noogler');
+    const btnModeGoogler = document.getElementById('btn-mode-googler');
     const btnBell = document.getElementById('btn-bell');
     const btnPause = document.getElementById('btn-pause');
     const btnPauseLabel = document.getElementById('btn-pause-label');
@@ -37,6 +40,7 @@
     // Overlays & overlay buttons
     const overlayStart = document.getElementById('overlay-start');
     const overlayPause = document.getElementById('overlay-pause');
+    const overlayRespawnUnlocked = document.getElementById('overlay-respawn-unlocked');
     const overlayVictory = document.getElementById('overlay-victory');
     const overlayRevive = document.getElementById('overlay-revive');
     const overlayGameover = document.getElementById('overlay-gameover');
@@ -44,6 +48,7 @@
     const btnStartTour = document.getElementById('btn-start-tour');
     const btnResumeTour = document.getElementById('btn-resume-tour');
     const btnPauseRestart = document.getElementById('btn-pause-restart');
+    const btnRespawnContinue = document.getElementById('btn-respawn-continue');
     const btnContinueEndless = document.getElementById('btn-continue-endless');
     const btnPlayAgainVictory = document.getElementById('btn-play-again-victory');
     const btnFreeContinue = document.getElementById('btn-free-continue');
@@ -51,6 +56,7 @@
     const btnRestart = document.getElementById('btn-restart');
 
     // Overlay stats fields
+    const respawnStoredCountEl = document.getElementById('respawn-stored-count');
     const victoryScoreEl = document.getElementById('victory-score');
     const victoryTimeEl = document.getElementById('victory-time');
     const victoryClearedEl = document.getElementById('victory-cleared');
@@ -96,12 +102,24 @@
       iconSoundOff.hidden = !muted;
     }
 
+    function syncSpeedModeButtons(mode) {
+      const isNoogler = mode === 'noogler';
+      btnModeNoogler.setAttribute('aria-pressed', isNoogler ? 'true' : 'false');
+      btnModeGoogler.setAttribute('aria-pressed', isNoogler ? 'false' : 'true');
+    }
+
     function updateActiveCampusUI(campus) {
       if (campus.id === lastActiveCampusId) return;
       lastActiveCampusId = campus.id;
       hudCampusDot.style.backgroundColor = campus.badgeColor;
       hudCampusName.textContent = campus.name;
       hudCampusLandmark.textContent = campus.landmark;
+      hudCampusDiff.textContent = campus.difficultyLabel || ('LVL ' + (campus.difficulty || 1));
+      if (campus.difficulty >= 6) {
+        hudCampusDiff.classList.add('diff-badge-hardest');
+      } else {
+        hudCampusDiff.classList.remove('diff-badge-hardest');
+      }
 
       for (let i = 0; i < campusPills.length; i++) {
         const pill = campusPills[i];
@@ -117,6 +135,7 @@
       const st = snapshot.state;
       overlayStart.hidden = st !== 'idle';
       overlayPause.hidden = st !== 'paused';
+      overlayRespawnUnlocked.hidden = st !== 'respawn-unlocked';
       overlayVictory.hidden = st !== 'victory';
       overlayRevive.hidden = st !== 'revive';
       overlayGameover.hidden = st !== 'gameover';
@@ -132,17 +151,24 @@
         victoryScoreEl.textContent = padScore(snapshot.score);
         victoryTimeEl.textContent = formatTime(snapshot.runTime);
         victoryClearedEl.textContent = String(snapshot.clearedCount);
-        victoryCampusesEl.textContent = snapshot.visitedCount + ' / 4';
+        victoryCampusesEl.textContent = snapshot.visitedCount + ' / 6';
         if (lastState !== 'victory') {
           announce('World Tour complete! Final score ' + snapshot.score + '.');
           btnContinueEndless.focus();
+        }
+      } else if (st === 'respawn-unlocked') {
+        const stored = snapshot.freeContinues || 1;
+        respawnStoredCountEl.textContent = '×' + stored;
+        if (lastState !== 'respawn-unlocked') {
+          announce('Respawn unlocked! ' + stored + ' respawns stored. Press Space to keep riding.');
+          btnRespawnContinue.focus();
         }
       } else if (st === 'revive') {
         reviveScoreEl.textContent = padScore(snapshot.score);
         reviveCampusEl.textContent = snapshot.campus.shortName;
         reviveLeftEl.textContent = String(snapshot.freeContinues || 0);
         if (lastState !== 'revive') {
-          announce('Free Continue available! Press Space to continue from ' + snapshot.campus.shortName + ' at score ' + snapshot.score + '.');
+          announce('Respawn available! Press Space to continue from ' + snapshot.campus.shortName + ' at score ' + snapshot.score + '.');
           btnFreeContinue.focus();
         }
       } else if (st === 'gameover') {
@@ -174,23 +200,25 @@
       onHud: function (hud) {
         hudHiScore.textContent = padScore(hud.highScore);
         hudScore.textContent = padScore(hud.score);
+        syncSpeedModeButtons(hud.speedMode);
 
+        const speedLabel = hud.speedMode === 'noogler' ? 'NOOGLER' : 'GOOGLER';
         if (hud.endlessMode) {
-          hudModeBadge.textContent = 'ENDLESS';
+          hudModeBadge.textContent = speedLabel + ' · ENDLESS';
           hudModeBadge.dataset.mode = 'endless';
         } else if (hud.isPreview) {
-          hudModeBadge.textContent = 'PREVIEW';
+          hudModeBadge.textContent = speedLabel + ' · PREVIEW';
           hudModeBadge.dataset.mode = 'preview';
         } else {
-          hudModeBadge.textContent = 'WORLD TOUR';
+          hudModeBadge.textContent = speedLabel + ' · TOUR';
           hudModeBadge.dataset.mode = 'tour';
         }
 
         const pct = Math.round(hud.tourProgress * 100);
         tourProgressFill.style.width = pct + '%';
-        tourProgressEl.setAttribute('aria-valuenow', String(Math.min(1400, hud.score)));
+        tourProgressEl.setAttribute('aria-valuenow', String(Math.min(2100, hud.score)));
 
-        const thresholds = { 'mountain-view': 0, london: 350, tokyo: 700, zurich: 1050 };
+        const thresholds = { sydney: 0, zurich: 350, london: 700, 'new-york': 1050, tokyo: 1400, 'mountain-view': 1750 };
         for (let i = 0; i < routeStops.length; i++) {
           const stop = routeStops[i];
           const minPts = thresholds[stop.dataset.stop] || 0;
@@ -212,7 +240,7 @@
         const continues = hud.freeContinues || 0;
         hudContinueBadge.hidden = continues <= 0;
         if (continues > 0) {
-          hudContinueBadge.textContent = 'CONTINUE ×' + continues;
+          hudContinueBadge.textContent = 'RESPAWNS ×' + continues;
         }
 
         const invTime = hud.invincibleTimer || 0;
@@ -240,32 +268,47 @@
           announce('Gemini invincibility active for 6 seconds.');
         } else if (type === 'google-g') {
           announce('Google G collected, ' + value + ' of 3.');
-        } else if (type === 'continue-unlocked') {
-          announce('3 Google G logos collected! Free Continue unlocked.');
         }
       }
     });
 
     global.PelicanGame.instance = engine;
     syncSoundButton();
+    syncSpeedModeButtons(engine.speedMode);
     engine.startLoop();
 
     // Button listeners
-    btnBell.addEventListener('click', function () {
+    btnModeNoogler.addEventListener('click', function (e) {
+      engine.setSpeedMode('noogler');
+      syncSpeedModeButtons('noogler');
+      announce('Noogler mode: steady cruise speed.');
+      if (e.detail > 0) canvas.focus();
+    });
+
+    btnModeGoogler.addEventListener('click', function (e) {
+      engine.setSpeedMode('googler');
+      syncSpeedModeButtons('googler');
+      announce('Googler mode: speed increases continuously.');
+      if (e.detail > 0) canvas.focus();
+    });
+
+    btnBell.addEventListener('click', function (e) {
       engine.ringBell();
+      if (e.detail > 0) canvas.focus();
     });
 
     btnPause.addEventListener('click', function () {
       engine.togglePause();
     });
 
-    btnSound.addEventListener('click', function () {
+    btnSound.addEventListener('click', function (e) {
       AudioMod.toggleMute();
       syncSoundButton();
+      if (e.detail > 0) canvas.focus();
     });
 
     btnStartTour.addEventListener('click', function () {
-      engine.startTour('mountain-view');
+      engine.startTour('sydney');
       canvas.focus();
     });
 
@@ -278,13 +321,18 @@
       canvas.focus();
     });
 
+    btnRespawnContinue.addEventListener('click', function () {
+      engine.dismissRespawnSplash();
+      canvas.focus();
+    });
+
     btnContinueEndless.addEventListener('click', function () {
       engine.continueEndless();
       canvas.focus();
     });
 
     btnPlayAgainVictory.addEventListener('click', function () {
-      engine.startTour('mountain-view');
+      engine.startTour('sydney');
       canvas.focus();
     });
 
@@ -340,7 +388,7 @@
     btnTouchDuck.addEventListener('pointerdown', function (e) {
       e.preventDefault();
       if (engine.state === 'idle') {
-        engine.startTour('mountain-view');
+        engine.startTour('sydney');
       }
       engine.setDuck(true);
     });
@@ -386,7 +434,7 @@
         // Allow native <button> Space activation for toolbar, campus picker, pause, and victory buttons
         if (code === 'Space' && isButtonFocused) {
           const focused = document.activeElement;
-          const isQuickSpaceButton = focused === btnStartTour || focused === btnRestart || focused === btnFreeContinue;
+          const isQuickSpaceButton = focused === btnStartTour || focused === btnRestart || focused === btnFreeContinue || focused === btnRespawnContinue;
           if (!isQuickSpaceButton) {
             return;
           }

@@ -5,7 +5,7 @@
   const STAGE_H = 340;
   const GROUND_Y = 282;
   const CAMPUS_SPAN = 350;
-  const TOUR_FINISH = 1400;
+  const TOUR_FINISH = 2100;
   const TRANSITION_PTS = 45;
   const PIXELS_PER_PT = 1 / 0.048;
 
@@ -43,42 +43,79 @@
 
   const LIST = [
     {
-      id: 'mountain-view',
-      name: 'Mountain View, CA',
-      shortName: 'Mountain View',
-      city: 'Mountain View',
-      landmark: 'Bay View & Googleplex',
-      badgeColor: '#4285F4',
+      id: 'sydney',
+      code: 'SYD',
+      difficulty: 1,
+      difficultyLabel: 'LVL 1 · EASY',
+      name: 'Sydney, Australia',
+      shortName: 'Sydney',
+      city: 'Sydney',
+      landmark: 'Pyrmont & Darling Harbour',
+      badgeColor: '#00ACC1',
       startScore: 0,
       endScore: 350,
       palette: {
-        skyTop: '#6cb2f7',
-        skyMid: '#b6dcfe',
-        skyHorizon: '#eef7ff',
-        sunX: 790,
-        sunY: 70,
-        sunColor: '#fff2a6',
+        skyTop: '#56b5f7',
+        skyMid: '#b0e2ff',
+        skyHorizon: '#eff9ff',
+        sunX: 785,
+        sunY: 66,
+        sunColor: '#fff4ad',
         sunGlow: '#ffe066',
         cloudFill: '#ffffff',
-        farRidge: '#89af9e',
-        nearRidge: '#6a9883',
-        roadFill: '#6b727a',
-        curbFill: '#d9dee3',
-        laneFill: '#42a362',
-        laneStripe: '#eef7f0',
-        edgeAccent: '#65a862',
+        farRidge: '#7fb3d5',
+        nearRidge: '#5d98bf',
+        roadFill: '#7a7874',
+        curbFill: '#e2d7c5',
+        laneFill: '#0097a7',
+        laneStripe: '#e0f7fa',
+        edgeAccent: '#58a46c',
         starsAlpha: 0
       }
     },
     {
+      id: 'zurich',
+      code: 'ZRH',
+      difficulty: 2,
+      difficultyLabel: 'LVL 2',
+      name: 'Zurich, Switzerland',
+      shortName: 'Zurich',
+      city: 'Zurich',
+      landmark: 'Hürlimann Areal',
+      badgeColor: '#34A853',
+      startScore: 350,
+      endScore: 700,
+      palette: {
+        skyTop: '#243a69',
+        skyMid: '#5f77a8',
+        skyHorizon: '#f0b28e',
+        sunX: 165,
+        sunY: 158,
+        sunColor: '#ffd99e',
+        sunGlow: '#f5987e',
+        cloudFill: '#d8cfe3',
+        farRidge: '#56688f',
+        nearRidge: '#415275',
+        roadFill: '#4d5460',
+        curbFill: '#bfc6ce',
+        laneFill: '#4d5460',
+        laneStripe: '#fbbc04',
+        edgeAccent: '#3b6a4f',
+        starsAlpha: 0.72
+      }
+    },
+    {
       id: 'london',
+      code: 'LDN',
+      difficulty: 3,
+      difficultyLabel: 'LVL 3',
       name: 'London, UK',
       shortName: 'London',
       city: 'London',
       landmark: "King's Cross Landscraper",
       badgeColor: '#EA4335',
-      startScore: 350,
-      endScore: 700,
+      startScore: 700,
+      endScore: 1050,
       palette: {
         skyTop: '#83acd4',
         skyMid: '#c4dbf0',
@@ -99,14 +136,48 @@
       }
     },
     {
+      id: 'new-york',
+      code: 'NYC',
+      difficulty: 4,
+      difficultyLabel: 'LVL 4',
+      name: 'New York, USA',
+      shortName: 'New York',
+      city: 'New York',
+      landmark: "Pier 57 & St. John's Terminal",
+      badgeColor: '#F57C00',
+      startScore: 1050,
+      endScore: 1400,
+      palette: {
+        skyTop: '#5c95d6',
+        skyMid: '#b5d4f1',
+        skyHorizon: '#ffe4c4',
+        sunX: 195,
+        sunY: 112,
+        sunColor: '#ffe7a6',
+        sunGlow: '#ffba75',
+        cloudFill: '#fff6eb',
+        farRidge: '#798da8',
+        nearRidge: '#60738e',
+        roadFill: '#555c66',
+        curbFill: '#c9cfd6',
+        laneFill: '#2e8b57',
+        laneStripe: '#eef7f0',
+        edgeAccent: '#4f8a57',
+        starsAlpha: 0.08
+      }
+    },
+    {
       id: 'tokyo',
+      code: 'TYO',
+      difficulty: 5,
+      difficultyLabel: 'LVL 5',
       name: 'Tokyo, Japan',
       shortName: 'Tokyo',
       city: 'Tokyo',
       landmark: 'Shibuya Stream',
-      badgeColor: '#FBBC04',
-      startScore: 700,
-      endScore: 1050,
+      badgeColor: '#9334E6',
+      startScore: 1400,
+      endScore: 1750,
       palette: {
         skyTop: '#4e5d9e',
         skyMid: '#d5897d',
@@ -127,31 +198,34 @@
       }
     },
     {
-      id: 'zurich',
-      name: 'Zurich, Switzerland',
-      shortName: 'Zurich',
-      city: 'Zurich',
-      landmark: 'Hürlimann Areal',
-      badgeColor: '#34A853',
-      startScore: 1050,
-      endScore: 1400,
+      id: 'mountain-view',
+      code: 'MTV',
+      difficulty: 6,
+      difficultyLabel: 'LVL 6 · HARDEST',
+      name: 'Mountain View, CA',
+      shortName: 'Mountain View',
+      city: 'Mountain View',
+      landmark: 'Bay View & Googleplex',
+      badgeColor: '#4285F4',
+      startScore: 1750,
+      endScore: 2100,
       palette: {
-        skyTop: '#243a69',
-        skyMid: '#5f77a8',
-        skyHorizon: '#f0b28e',
-        sunX: 165,
-        sunY: 158,
-        sunColor: '#ffd99e',
-        sunGlow: '#f5987e',
-        cloudFill: '#d8cfe3',
-        farRidge: '#56688f',
-        nearRidge: '#415275',
-        roadFill: '#4d5460',
-        curbFill: '#bfc6ce',
-        laneFill: '#4d5460',
-        laneStripe: '#fbbc04',
-        edgeAccent: '#3b6a4f',
-        starsAlpha: 0.72
+        skyTop: '#6cb2f7',
+        skyMid: '#b6dcfe',
+        skyHorizon: '#eef7ff',
+        sunX: 790,
+        sunY: 70,
+        sunColor: '#fff2a6',
+        sunGlow: '#ffe066',
+        cloudFill: '#ffffff',
+        farRidge: '#89af9e',
+        nearRidge: '#6a9883',
+        roadFill: '#6b727a',
+        curbFill: '#d9dee3',
+        laneFill: '#42a362',
+        laneStripe: '#eef7f0',
+        edgeAccent: '#65a862',
+        starsAlpha: 0
       }
     }
   ];
@@ -1160,11 +1234,321 @@
     }
   }
 
+  // =========================================================================
+  // 5. SYDNEY — Pyrmont Waterfront + Opera House + Harbour Bridge + Ferry
+  // =========================================================================
+  function drawSydneyFar(ctx, worldDist) {
+    // Darling Harbour shimmering water band
+    ctx.fillStyle = '#4ea6db';
+    ctx.fillRect(0, GROUND_Y - 26, STAGE_W, 26);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    for (let wx = 20; wx < STAGE_W; wx += 95) {
+      ctx.fillRect(wx, GROUND_Y - 17, 36, 2);
+      ctx.fillRect(wx + 42, GROUND_Y - 9, 22, 1.5);
+    }
+
+    const span = 960;
+    const shift = modPositive(worldDist * 0.055, span);
+    for (let r = -1; r <= 1; r++) {
+      const ox = -shift + r * span;
+
+      // Sydney Harbour Bridge steel arch & granite pylons
+      const bx = ox + 170;
+      ctx.fillStyle = '#8b939c';
+      ctx.fillRect(bx - 88, GROUND_Y - 76, 16, 52);
+      ctx.fillRect(bx + 72, GROUND_Y - 76, 16, 52);
+      ctx.strokeStyle = '#6b7785';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(bx, GROUND_Y - 24, 92, Math.PI * 1.12, Math.PI * 1.88);
+      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(bx, GROUND_Y - 24, 72, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.stroke();
+      // Road deck
+      ctx.fillStyle = '#5c6672';
+      ctx.fillRect(bx - 115, GROUND_Y - 46, 230, 5);
+      // Vertical hangers
+      ctx.strokeStyle = 'rgba(92, 102, 114, 0.7)';
+      ctx.lineWidth = 1.1;
+      for (let hx = bx - 64; hx <= bx + 64; hx += 16) {
+        ctx.beginPath();
+        ctx.moveTo(hx, GROUND_Y - 46);
+        ctx.lineTo(hx, GROUND_Y - 92);
+        ctx.stroke();
+      }
+
+      // Iconic Sydney Opera House white concrete sail shells
+      const sx = ox + 590;
+      ctx.fillStyle = '#d3c7b4';
+      ctx.fillRect(sx - 6, GROUND_Y - 32, 138, 8);
+      const sails = [
+        [sx + 6, GROUND_Y - 32, sx + 26, GROUND_Y - 86, sx + 48, GROUND_Y - 32],
+        [sx + 34, GROUND_Y - 32, sx + 60, GROUND_Y - 98, sx + 88, GROUND_Y - 32],
+        [sx + 72, GROUND_Y - 32, sx + 98, GROUND_Y - 82, sx + 122, GROUND_Y - 32]
+      ];
+      for (let i = 0; i < sails.length; i++) {
+        const s = sails[i];
+        ctx.fillStyle = i === 1 ? '#ffffff' : '#eef4fa';
+        ctx.strokeStyle = '#9aa8b8';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(s[0], s[1]);
+        ctx.quadraticCurveTo(s[0] + 4, s[3] + 10, s[2], s[3]);
+        ctx.quadraticCurveTo(s[4] - 2, s[3] + 16, s[4], s[5]);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+  }
+
+  function drawSydneyFerry(ctx, timeSec) {
+    const fx = modPositive(timeSec * 42, STAGE_W + 160) - 80;
+    const fy = GROUND_Y - 24;
+    ctx.save();
+    // Classic green & gold Sydney Harbour ferry
+    ctx.fillStyle = '#1b5e20';
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(fx + 74, fy);
+    ctx.lineTo(fx + 66, fy + 11);
+    ctx.lineTo(fx + 8, fy + 11);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(fx + 10, fy - 11, 54, 11);
+    ctx.fillStyle = '#fbbc04';
+    ctx.fillRect(fx + 10, fy - 3, 54, 3);
+    ctx.fillStyle = '#37474f';
+    for (let w = 0; w < 5; w++) {
+      ctx.fillRect(fx + 14 + w * 10, fy - 9, 7, 4.5);
+    }
+    ctx.restore();
+  }
+
+  function drawSydneyMid(ctx, worldDist, timeSec) {
+    const span = 680;
+    const shift = modPositive(worldDist * 0.22, span);
+    for (let r = -1; r <= 2; r++) {
+      const ox = -shift + r * span;
+      if (ox > STAGE_W + 80 || ox + span < -80) continue;
+
+      // Google Pyrmont Workplace6 glass & warm timber waterfront campus
+      ctx.fillStyle = '#8cc0ea';
+      ctx.fillRect(ox + 26, GROUND_Y - 76, 210, 76);
+      ctx.fillStyle = '#d7ecf9';
+      for (let row = 0; row < 3; row++) {
+        ctx.fillRect(ox + 34, GROUND_Y - 64 + row * 21, 194, 11);
+      }
+      // Signature warm Australian timber louver bays & sloped solar roof
+      ctx.fillStyle = '#c4834b';
+      for (let lx = ox + 42; lx < ox + 225; lx += 28) {
+        ctx.fillRect(lx, GROUND_Y - 76, 6, 76);
+      }
+      ctx.fillStyle = '#3c4a57';
+      ctx.beginPath();
+      ctx.moveTo(ox + 18, GROUND_Y - 76);
+      ctx.lineTo(ox + 244, GROUND_Y - 88);
+      ctx.lineTo(ox + 244, GROUND_Y - 81);
+      ctx.lineTo(ox + 18, GROUND_Y - 70);
+      ctx.closePath();
+      ctx.fill();
+
+      // Companion harbor-side timber pavilion
+      ctx.fillStyle = '#e5dac8';
+      ctx.fillRect(ox + 286, GROUND_Y - 54, 120, 54);
+      ctx.fillStyle = '#4e91c9';
+      ctx.fillRect(ox + 296, GROUND_Y - 42, 100, 24);
+    }
+    drawSydneyFerry(ctx, timeSec);
+  }
+
+  function drawSydneyFore(ctx, worldDist) {
+    const span = 340;
+    const shift = modPositive(worldDist * 0.55, span);
+    for (let r = -1; r <= 3; r++) {
+      const ox = -shift + r * span;
+      if (ox > STAGE_W + 40 || ox + span < -40) continue;
+
+      // Pyrmont timber boardwalk rail
+      ctx.strokeStyle = '#9e7a57';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ox, GROUND_Y - 16);
+      ctx.lineTo(ox + span, GROUND_Y - 16);
+      for (let rx = ox + 16; rx < ox + span; rx += 28) {
+        ctx.moveTo(rx, GROUND_Y - 16);
+        ctx.lineTo(rx, GROUND_Y);
+      }
+      ctx.stroke();
+
+      // Coastal palm
+      drawPalmTree(ctx, ox + 190, GROUND_Y, 54);
+    }
+  }
+
+  // =========================================================================
+  // 6. NEW YORK — Pier 57 + St. John's Terminal + Skyline + Yellow Cab
+  // =========================================================================
+  function drawNewYorkFar(ctx, worldDist, p) {
+    // Hudson River afternoon reflection strip
+    ctx.fillStyle = '#6da0cf';
+    ctx.fillRect(0, GROUND_Y - 18, STAGE_W, 18);
+
+    const span = 960;
+    const shift = modPositive(worldDist * 0.06, span);
+    ctx.fillStyle = p.farRidge;
+    for (let r = -1; r <= 1; r++) {
+      const ox = -shift + r * span;
+      // Downtown & Midtown Manhattan skyline silhouettes
+      ctx.fillRect(ox + 30, GROUND_Y - 78, 44, 62);
+      ctx.fillRect(ox + 84, GROUND_Y - 96, 36, 80);
+
+      // One World Trade Center tapered tower + spire
+      ctx.beginPath();
+      ctx.moveTo(ox + 188, GROUND_Y - 16);
+      ctx.lineTo(ox + 195, GROUND_Y - 152);
+      ctx.lineTo(ox + 217, GROUND_Y - 152);
+      ctx.lineTo(ox + 224, GROUND_Y - 16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillRect(ox + 205, GROUND_Y - 182, 2.5, 32);
+
+      // Midtown towers
+      ctx.fillRect(ox + 340, GROUND_Y - 92, 52, 76);
+      ctx.fillRect(ox + 410, GROUND_Y - 74, 48, 58);
+
+      // Empire State Building
+      ctx.fillRect(ox + 608, GROUND_Y - 122, 42, 106);
+      ctx.fillRect(ox + 616, GROUND_Y - 148, 26, 28);
+      ctx.fillRect(ox + 623, GROUND_Y - 164, 12, 18);
+      ctx.fillRect(ox + 628, GROUND_Y - 188, 2.5, 26);
+
+      ctx.fillRect(ox + 720, GROUND_Y - 88, 54, 72);
+      ctx.fillRect(ox + 810, GROUND_Y - 104, 46, 88);
+    }
+  }
+
+  function drawYellowCab(ctx, timeSec) {
+    const cx = STAGE_W - modPositive(timeSec * 84, STAGE_W + 140);
+    const cy = GROUND_Y - 2;
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Iconic NYC Yellow Cab
+    ctx.fillStyle = '#fbbc04';
+    ctx.beginPath();
+    ctx.roundRect(0, -14, 44, 11, 3);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(9, -21, 24, 9, [4, 4, 0, 0]);
+    ctx.fill();
+    ctx.fillStyle = '#3c4043';
+    ctx.fillRect(12, -19, 8, 5);
+    ctx.fillRect(22, -19, 9, 5);
+    // Medallion roof light
+    ctx.fillStyle = '#fff9c4';
+    ctx.fillRect(19, -23.5, 6, 2.5);
+    ctx.fillStyle = '#202124';
+    ctx.beginPath();
+    ctx.arc(10, -3, 3.6, 0, Math.PI * 2);
+    ctx.arc(34, -3, 3.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawNewYorkMid(ctx, worldDist, timeSec) {
+    const span = 740;
+    const shift = modPositive(worldDist * 0.22, span);
+    for (let r = -1; r <= 2; r++) {
+      const ox = -shift + r * span;
+      if (ox > STAGE_W + 80 || ox + span < -80) continue;
+
+      // Google Pier 57 — historic concrete headhouse + panoramic glass + rooftop park
+      const p57 = ox + 20;
+      ctx.fillStyle = '#c8c3ba';
+      ctx.fillRect(p57, GROUND_Y - 62, 260, 62);
+      ctx.fillStyle = '#7db0de';
+      for (let gx = p57 + 16; gx < p57 + 245; gx += 32) {
+        ctx.fillRect(gx, GROUND_Y - 52, 24, 34);
+      }
+      // Rooftop park trees & green berm on Pier 57
+      ctx.fillStyle = '#4e9453';
+      ctx.fillRect(p57 + 8, GROUND_Y - 67, 244, 5);
+      for (let tx = p57 + 26; tx < p57 + 245; tx += 36) {
+        ctx.fillStyle = '#428348';
+        ctx.beginPath();
+        ctx.arc(tx, GROUND_Y - 75, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Google St. John's Terminal — historic brick rail terminal base + terraced modern glass upper floors
+      const sjt = ox + 335;
+      ctx.fillStyle = '#9c4e3c';
+      ctx.fillRect(sjt, GROUND_Y - 46, 220, 46);
+      // Viaduct arched brick bays
+      ctx.fillStyle = '#ffd584';
+      for (let ax = sjt + 16; ax < sjt + 205; ax += 32) {
+        ctx.beginPath();
+        ctx.roundRect(ax, GROUND_Y - 36, 18, 26, [9, 9, 0, 0]);
+        ctx.fill();
+      }
+      // Modern terraced steel & glass upper massing
+      ctx.fillStyle = '#6f9fd1';
+      ctx.fillRect(sjt + 14, GROUND_Y - 94, 192, 48);
+      ctx.fillStyle = '#ffe5a3';
+      for (let row = 0; row < 2; row++) {
+        ctx.fillRect(sjt + 22, GROUND_Y - 84 + row * 20, 176, 9);
+      }
+      ctx.fillStyle = '#4f8f54';
+      ctx.fillRect(sjt + 18, GROUND_Y - 99, 184, 5);
+    }
+    drawYellowCab(ctx, timeSec);
+  }
+
+  function drawNewYorkFore(ctx, worldDist) {
+    const span = 340;
+    const shift = modPositive(worldDist * 0.55, span);
+    for (let r = -1; r <= 3; r++) {
+      const ox = -shift + r * span;
+      if (ox > STAGE_W + 40 || ox + span < -40) continue;
+
+      // Hudson River Greenway iron railing
+      ctx.strokeStyle = '#3c4043';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(ox, GROUND_Y - 18);
+      ctx.lineTo(ox + span, GROUND_Y - 18);
+      for (let rx = ox + 14; rx < ox + span; rx += 22) {
+        ctx.moveTo(rx, GROUND_Y - 18);
+        ctx.lineTo(rx, GROUND_Y);
+      }
+      ctx.stroke();
+
+      // Classic NYC globe streetlamp
+      ctx.fillStyle = '#263238';
+      ctx.fillRect(ox + 165, GROUND_Y - 56, 3, 56);
+      ctx.fillStyle = '#fff2b2';
+      ctx.beginPath();
+      ctx.arc(ox + 166.5, GROUND_Y - 58, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   function drawCampusLayers(ctx, campusId, worldDist, timeSec, palette, alpha) {
     if (alpha <= 0.01) return;
     ctx.save();
     ctx.globalAlpha = alpha;
-    if (campusId === 'mountain-view') {
+    if (campusId === 'sydney') {
+      drawSydneyFar(ctx, worldDist);
+      drawSydneyMid(ctx, worldDist, timeSec);
+      drawSydneyFore(ctx, worldDist);
+    } else if (campusId === 'new-york') {
+      drawNewYorkFar(ctx, worldDist, palette);
+      drawNewYorkMid(ctx, worldDist, timeSec);
+      drawNewYorkFore(ctx, worldDist);
+    } else if (campusId === 'mountain-view') {
       drawMountainViewFar(ctx, worldDist, palette);
       drawMountainViewMid(ctx, worldDist);
       drawMountainViewFore(ctx, worldDist);
@@ -1227,11 +1611,14 @@
 
   function drawMilestoneGates(ctx, score, endlessMode) {
     const pelicanFrontX = 186;
-    const gates = [
-      { targetScore: 350, title: 'LONDON', sub: "KING'S CROSS", color: '#EA4335' },
-      { targetScore: 700, title: 'TOKYO', sub: 'SHIBUYA STREAM', color: '#FBBC04' },
-      { targetScore: 1050, title: 'ZURICH', sub: 'HURLIMANN AREAL', color: '#34A853' }
-    ];
+    const gates = LIST.slice(1).map(function (c) {
+      return {
+        targetScore: c.startScore,
+        title: c.shortName.toUpperCase() + ' · ' + c.difficultyLabel,
+        sub: c.landmark.toUpperCase(),
+        color: c.badgeColor
+      };
+    });
 
     for (let i = 0; i < gates.length; i++) {
       const g = gates[i];
@@ -1239,7 +1626,7 @@
         ? modPositive(g.targetScore - modPositive(score, TOUR_FINISH) + 300, TOUR_FINISH) - 300
         : g.targetScore - score;
       const gx = pelicanFrontX + rel * PIXELS_PER_PT;
-      if (gx < -140 || gx > STAGE_W + 140) continue;
+      if (gx < -160 || gx > STAGE_W + 160) continue;
 
       // Welcome archway signpost
       ctx.save();
@@ -1247,14 +1634,14 @@
       ctx.fillRect(gx - 3, GROUND_Y - 122, 6, 122);
       ctx.fillStyle = g.color;
       ctx.beginPath();
-      ctx.roundRect(gx - 68, GROUND_Y - 134, 136, 34, 8);
+      ctx.roundRect(gx - 88, GROUND_Y - 134, 176, 36, 8);
       ctx.fill();
       ctx.fillStyle = '#ffffff';
-      ctx.font = '700 10px ui-monospace, Menlo, monospace';
+      ctx.font = '700 9.5px ui-monospace, Menlo, monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('NEXT: ' + g.title, gx, GROUND_Y - 119);
-      ctx.font = '700 11px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(g.sub, gx, GROUND_Y - 106);
+      ctx.fillText(g.title, gx, GROUND_Y - 119);
+      ctx.font = '700 10.5px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillText(g.sub, gx, GROUND_Y - 105);
       ctx.restore();
     }
 

@@ -144,26 +144,62 @@
 
     reset() {
       this.items = [];
-      this.nextGTimer = randomRange(2.4, 3.8);
-      this.nextGeminiTimer = randomRange(5.2, 7.8);
+      this.nextGTimer = randomRange(3.2, 4.8);
+      this.nextGeminiTimer = randomRange(6.0, 9.0);
+      this.riskWaitG = 0;
+      this.riskWaitGemini = 0;
     }
 
-    spawn(kind, obstacles) {
-      const spawnX = STAGE_W + 45;
+    spawn(kind, obstacles, difficulty) {
+      const diff = Math.max(1, difficulty || 1);
+      const riskFactor = Math.max(0, Math.min(1, (diff - 1) / 5));
+      const useRisky = Math.random() < (0.25 + riskFactor * 0.65);
+
       const obsList = obstacles && obstacles.items ? obstacles.items : [];
-      let nearObstacle = false;
-      for (let i = 0; i < obsList.length; i++) {
+      let hostObs = null;
+      for (let i = obsList.length - 1; i >= 0; i--) {
         const obs = obsList[i];
-        const obsCenter = obs.x + obs.w * 0.5;
-        if (Math.abs(obsCenter - spawnX) <= 85) {
-          nearObstacle = true;
+        if (!obs.smashed && obs.x >= STAGE_W - 140 && obs.x <= STAGE_W + 160) {
+          hostObs = obs;
           break;
         }
       }
 
-      const baseY = nearObstacle
-        ? GROUND_Y - 102
-        : (Math.random() < 0.5 ? GROUND_Y - 40 : GROUND_Y - 94);
+      let spawnX = STAGE_W + 45;
+      let baseY;
+      let speedMult = 1;
+
+      if (useRisky && hostObs) {
+        if (hostObs.isAerial && (hostObs.baseY || hostObs.y) + hostObs.h <= GROUND_Y - 40) {
+          // Place directly in the low-duck lane beneath a high aerial obstacle
+          spawnX = hostObs.x + hostObs.w * 0.5;
+          baseY = GROUND_Y - 22;
+          speedMult = hostObs.speedMult || 1;
+        } else {
+          // Place in a bold jump arc directly over a ground obstacle's peak
+          spawnX = hostObs.x + hostObs.w * 0.5;
+          baseY = Math.max(150, hostObs.y - 44);
+        }
+      } else if (useRisky) {
+        const waitCount = kind === 'gemini' ? this.riskWaitGemini : this.riskWaitG;
+        if (waitCount < 3) {
+          return false; // briefly defer so collectible aligns over next obstacle
+        }
+        baseY = GROUND_Y - 112;
+      } else {
+        // Early-level friendly placement away from nearby obstacles
+        let nearObstacle = false;
+        for (let i = 0; i < obsList.length; i++) {
+          const obs = obsList[i];
+          if (!obs.smashed && Math.abs((obs.x + obs.w * 0.5) - spawnX) <= 85) {
+            nearObstacle = true;
+            break;
+          }
+        }
+        baseY = nearObstacle
+          ? GROUND_Y - 102
+          : (Math.random() < 0.5 ? GROUND_Y - 42 : GROUND_Y - 90);
+      }
 
       const radius = kind === 'gemini' ? 16 : 15;
       this.items.push({
@@ -172,8 +208,10 @@
         baseY: baseY,
         y: baseY,
         r: radius,
+        speedMult: speedMult,
         bobPhase: Math.random() * Math.PI * 2
       });
+      return true;
     }
 
     spawnForEvaluation(kind, x, y) {
@@ -185,14 +223,15 @@
         baseY: baseY,
         y: baseY,
         r: radius,
+        speedMult: 1,
         bobPhase: 0
       });
     }
 
-    update(dt, speed, obstacles, blockSpawn, timeSec) {
+    update(dt, speed, obstacles, blockSpawn, timeSec, difficulty) {
       for (let i = this.items.length - 1; i >= 0; i--) {
         const item = this.items[i];
-        item.x -= speed * dt;
+        item.x -= speed * (item.speedMult || 1) * dt;
         item.y = item.baseY + Math.sin(timeSec * 4.2 + item.bobPhase) * 5;
         if (item.x + item.r * 2 < -60) {
           this.items.splice(i, 1);
@@ -203,14 +242,24 @@
 
       this.nextGTimer -= dt;
       if (this.nextGTimer <= 0) {
-        this.spawn('google-g', obstacles);
-        this.nextGTimer = randomRange(5.2, 8.5);
+        if (this.spawn('google-g', obstacles, difficulty)) {
+          this.riskWaitG = 0;
+          this.nextGTimer = randomRange(6.5, 10.0);
+        } else {
+          this.riskWaitG += 1;
+          this.nextGTimer = 0.2;
+        }
       }
 
       this.nextGeminiTimer -= dt;
       if (this.nextGeminiTimer <= 0) {
-        this.spawn('gemini', obstacles);
-        this.nextGeminiTimer = randomRange(10.5, 16.0);
+        if (this.spawn('gemini', obstacles, difficulty)) {
+          this.riskWaitGemini = 0;
+          this.nextGeminiTimer = randomRange(12.0, 17.5);
+        } else {
+          this.riskWaitGemini += 1;
+          this.nextGeminiTimer = 0.2;
+        }
       }
     }
 

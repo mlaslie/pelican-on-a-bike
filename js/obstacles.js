@@ -54,6 +54,26 @@
       aerial: [
         { kind: 'alpine-swift', w: 50, h: 24 }
       ]
+    },
+    sydney: {
+      ground: [
+        { kind: 'surfboard-rack', w: 44, h: 48 },
+        { kind: 'ferry-bollard', w: 44, h: 36 },
+        { kind: 'sydney-scooter', w: 48, h: 42 }
+      ],
+      aerial: [
+        { kind: 'harbour-gull', w: 50, h: 26 }
+      ]
+    },
+    'new-york': {
+      ground: [
+        { kind: 'nyc-hydrant', w: 34, h: 46 },
+        { kind: 'coffee-cart', w: 52, h: 48 },
+        { kind: 'subway-barrier', w: 48, h: 38 }
+      ],
+      aerial: [
+        { kind: 'nyc-pigeon', w: 46, h: 26 }
+      ]
     }
   };
 
@@ -566,17 +586,163 @@
     ctx.restore();
   }
 
+  function drawSurfboardRack(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    // Timber stand base
+    ctx.fillStyle = '#8b5e3c';
+    ctx.fillRect(4, h - 7, w - 8, 7);
+    // Two colorful surfboards leaning upright
+    ctx.fillStyle = '#00acc1';
+    ctx.strokeStyle = '#006064';
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.ellipse(14, 21, 7, 19, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#fbbc04';
+    ctx.strokeStyle = '#8f5700';
+    ctx.beginPath();
+    ctx.ellipse(29, 23, 7, 17, 0.08, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawFerryBollard(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#5f6368';
+    ctx.fillRect(6, h - 6, w - 12, 6);
+    ctx.fillStyle = '#00838f';
+    ctx.strokeStyle = '#004d40';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.roundRect(10, 8, w - 20, h - 13, 5);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ffe082';
+    ctx.fillRect(10, 14, w - 20, 4);
+    ctx.restore();
+  }
+
+  function drawSydneyScooter(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    // Wheels
+    ctx.fillStyle = '#202124';
+    ctx.beginPath();
+    ctx.arc(10, h - 6, 5.5, 0, Math.PI * 2);
+    ctx.arc(38, h - 6, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Teal deck & stem
+    ctx.strokeStyle = '#00acc1';
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(10, h - 8);
+    ctx.lineTo(35, h - 8);
+    ctx.lineTo(31, 7);
+    ctx.stroke();
+    ctx.strokeStyle = '#202124';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(26, 7);
+    ctx.lineTo(36, 7);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawNYCHydrant(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#9aa0a6';
+    ctx.fillRect(8, h - 6, w - 16, 6);
+    ctx.fillStyle = '#fbbc04';
+    ctx.strokeStyle = '#7c4a00';
+    ctx.lineWidth = 1.4;
+    ctx.fillRect(10, 12, w - 20, h - 18);
+    ctx.strokeRect(10, 12, w - 20, h - 18);
+    // Side nozzles
+    ctx.fillStyle = '#cfd8dc';
+    ctx.fillRect(4, 17, 6, 7);
+    ctx.fillRect(w - 10, 17, 6, 7);
+    // Domed silver cap
+    ctx.fillStyle = '#eceff1';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 12, 8, Math.PI, 0);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawCoffeeCart(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    // Wheels
+    ctx.fillStyle = '#202124';
+    ctx.beginPath();
+    ctx.arc(12, h - 6, 5.5, 0, Math.PI * 2);
+    ctx.arc(w - 12, h - 6, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    // Stainless steel body
+    ctx.fillStyle = '#cfd8dc';
+    ctx.strokeStyle = '#455a64';
+    ctx.lineWidth = 1.4;
+    ctx.fillRect(4, h - 30, w - 8, 22);
+    ctx.strokeRect(4, h - 30, w - 8, 22);
+    // Blue & yellow NYC cart canopy
+    ctx.fillStyle = '#1a73e8';
+    ctx.fillRect(2, 5, w - 4, 10);
+    ctx.fillStyle = '#fbbc04';
+    ctx.fillRect(10, 5, 10, 10);
+    ctx.fillRect(32, 5, 10, 10);
+    ctx.strokeStyle = '#455a64';
+    ctx.beginPath();
+    ctx.moveTo(8, 15);
+    ctx.lineTo(8, h - 30);
+    ctx.moveTo(w - 8, 15);
+    ctx.lineTo(w - 8, h - 30);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSubwayBarrier(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    // Classic green MTA subway railing post & sign
+    ctx.fillStyle = '#2e6f40';
+    ctx.fillRect(7, 8, 5, h - 8);
+    ctx.fillRect(w - 12, 8, 5, h - 8);
+    ctx.fillRect(4, 11, w - 8, 5);
+    ctx.fillRect(4, 22, w - 8, 4);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 13, 6.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1a73e8';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 13, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function drawObstacleBody(ctx, obs, timeSec) {
     switch (obs.kind) {
       case 'gbike-parked': drawParkedGBike(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'android-statue': drawAndroidStatue(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'noogler-pack': drawNooglerPack(ctx, obs.x, obs.y, obs.w, obs.h); break;
-      case 'seagull': drawBirdObstacle(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, { body: '#ffffff', wing: '#cfd8dc', beak: '#fbbc04' }); break;
+      case 'seagull':
+      case 'harbour-gull':
+        drawBirdObstacle(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, { body: '#ffffff', wing: '#cfd8dc', beak: '#fbbc04' }); break;
       case 'paper-plane': drawPaperPlane(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'postbox': drawPostbox(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'bollards': drawBollards(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'umbrella-stand': drawUmbrellaStand(ctx, obs.x, obs.y, obs.w, obs.h); break;
-      case 'pigeon': drawBirdObstacle(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, { body: '#90a4ae', wing: '#607d8b', beak: '#455a64', neckBand: '#66bb6a' }); break;
+      case 'pigeon':
+      case 'nyc-pigeon':
+        drawBirdObstacle(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, { body: '#90a4ae', wing: '#607d8b', beak: '#455a64', neckBand: '#66bb6a' }); break;
       case 'vending-machine': drawVendingMachine(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'tokyo-barricade': drawTokyoBarricade(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'delivery-crates': drawDeliveryCrates(ctx, obs.x, obs.y, obs.w, obs.h); break;
@@ -586,6 +752,12 @@
       case 'tram-sign': drawTramSign(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'alpine-planter': drawAlpinePlanter(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'alpine-swift': drawBirdObstacle(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, { body: '#37474f', wing: '#263238', beak: '#cfd8dc' }); break;
+      case 'surfboard-rack': drawSurfboardRack(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'ferry-bollard': drawFerryBollard(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'sydney-scooter': drawSydneyScooter(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'nyc-hydrant': drawNYCHydrant(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'coffee-cart': drawCoffeeCart(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'subway-barrier': drawSubwayBarrier(ctx, obs.x, obs.y, obs.w, obs.h); break;
       default: drawAndroidStatue(ctx, obs.x, obs.y, obs.w, obs.h); break;
     }
   }
@@ -621,49 +793,144 @@
     }
 
     isInGraceZone(score, runTime, endlessMode) {
-      if (runTime < 1.5) return true;
-      if (!endlessMode && score > 1335) return true;
+      if (runTime < 1.2) return true;
+      if (!endlessMode && score > 2045) return true;
 
-      const boundaries = [350, 700, 1050];
-      const wrapped = endlessMode ? score % 1400 : score;
+      const boundaries = [350, 700, 1050, 1400, 1750];
+      const wrapped = endlessMode ? score % 2100 : score;
       for (let i = 0; i < boundaries.length; i++) {
-        if (Math.abs(wrapped - boundaries[i]) <= 35) return true;
+        if (Math.abs(wrapped - boundaries[i]) <= 18) return true;
       }
-      if (endlessMode && (wrapped < 35 || wrapped > 1365)) return true;
+      if (endlessMode && (wrapped < 18 || wrapped > 2082)) return true;
       return false;
     }
 
-    spawn(campusId, speed, score, runPoints, runTime, isPreview) {
-      const pool = CATALOG[campusId] || CATALOG['mountain-view'];
-      const allowAerial = runPoints > 90 || (isPreview && runTime > 2.2);
-      const useAerial = allowAerial && Math.random() < 0.34;
-      const spec = useAerial ? pickRandom(pool.aerial) : pickRandom(pool.ground);
+    buildAerial(spec, x, diff, allowLowSkimmer) {
+      const speedMult = diff <= 2 ? 1.0 : diff === 3 ? 1.15 : diff === 4 ? 1.22 : diff === 5 ? 1.28 : 1.34;
+      const isLowSkimmer = allowLowSkimmer && Math.random() < 0.22;
+      const swoopAmp = isLowSkimmer ? 0 : (diff >= 6 ? 11 : diff === 5 ? 9 : diff === 4 ? 7 : 0);
+      const baseY = isLowSkimmer
+        ? GROUND_Y - 22 - spec.h
+        : GROUND_Y - 46 - swoopAmp - spec.h;
 
-      // High-duckable aerial sits above tucked pelican (top = 246), or occasional low-skimmer
-      let y;
-      if (useAerial) {
-        const isLowSkimmer = Math.random() < 0.25;
-        y = isLowSkimmer ? GROUND_Y - 22 - spec.h : GROUND_Y - 45 - spec.h;
-      } else {
-        y = GROUND_Y - spec.h;
-      }
-
-      this.items.push({
+      return {
         kind: spec.kind,
-        x: STAGE_W + 40,
-        y: y,
+        x: x,
+        y: baseY,
+        baseY: baseY,
         w: spec.w,
         h: spec.h,
-        isAerial: useAerial,
+        isAerial: true,
+        speedMult: speedMult,
+        swoopAmp: swoopAmp,
+        swoopFreq: 4.2,
+        swoopPhase: Math.random() * Math.PI * 2,
         cleared: false,
         smashed: false
-      });
-
-      const minGap = Math.max(255, speed * 0.62 + 125);
-      this.nextGap = randomRange(minGap, minGap * 1.55);
+      };
     }
 
-    update(dt, speed, campusId, score, runPoints, runTime, isPreview, endlessMode) {
+    spawn(campusId, speed, score, runPoints, runTime, isPreview, difficulty) {
+      const pool = CATALOG[campusId] || CATALOG['mountain-view'];
+      const diff = Math.max(1, difficulty || 1);
+      const allowAerial = runPoints > 70 || diff >= 2 || (isPreview && runTime > 1.8);
+      const spawnX = STAGE_W + 40;
+
+      // Pattern 1: Jump -> Fast-Fall -> Duck combo (Level 3+)
+      const comboChance = diff >= 3 ? Math.min(0.32, 0.14 + (diff - 3) * 0.055) : 0;
+      // Pattern 2: Double Ground Cluster (Level 2+)
+      const clusterChance = diff >= 2 ? Math.min(0.32, 0.14 + (diff - 2) * 0.045) : 0;
+
+      const roll = Math.random();
+      if (allowAerial && roll < comboChance) {
+        const gSpec = pickRandom(pool.ground);
+        const aSpec = pickRandom(pool.aerial);
+        this.items.push({
+          kind: gSpec.kind,
+          x: spawnX,
+          y: GROUND_Y - gSpec.h,
+          baseY: GROUND_Y - gSpec.h,
+          w: gSpec.w,
+          h: gSpec.h,
+          isAerial: false,
+          speedMult: 1,
+          swoopAmp: 0,
+          swoopFreq: 0,
+          swoopPhase: 0,
+          cleared: false,
+          smashed: false
+        });
+        const comboGap = Math.max(265, speed * 0.50 + 95);
+        this.items.push(this.buildAerial(aSpec, spawnX + gSpec.w + comboGap, diff, false));
+      } else if (roll < comboChance + clusterChance) {
+        const compactGround = pool.ground.filter(function (g) { return g.w <= 46; });
+        const clusterPool = compactGround.length > 0 ? compactGround : pool.ground;
+        const s1 = pickRandom(clusterPool);
+        const s2 = pickRandom(clusterPool);
+        this.items.push({
+          kind: s1.kind,
+          x: spawnX,
+          y: GROUND_Y - s1.h,
+          baseY: GROUND_Y - s1.h,
+          w: s1.w,
+          h: s1.h,
+          isAerial: false,
+          speedMult: 1,
+          swoopAmp: 0,
+          swoopFreq: 0,
+          swoopPhase: 0,
+          cleared: false,
+          smashed: false
+        });
+        if (s1.w + s2.w + 8 <= 96) {
+          this.items.push({
+            kind: s2.kind,
+            x: spawnX + s1.w + 8,
+            y: GROUND_Y - s2.h,
+            baseY: GROUND_Y - s2.h,
+            w: s2.w,
+            h: s2.h,
+            isAerial: false,
+            speedMult: 1,
+            swoopAmp: 0,
+            swoopFreq: 0,
+            swoopPhase: 0,
+            cleared: false,
+            smashed: false
+          });
+        }
+      } else {
+        const useAerial = allowAerial && Math.random() < Math.min(0.42, 0.28 + (diff - 1) * 0.025);
+        if (useAerial) {
+          this.items.push(this.buildAerial(pickRandom(pool.aerial), spawnX, diff, true));
+        } else {
+          const spec = pickRandom(pool.ground);
+          this.items.push({
+            kind: spec.kind,
+            x: spawnX,
+            y: GROUND_Y - spec.h,
+            baseY: GROUND_Y - spec.h,
+            w: spec.w,
+            h: spec.h,
+            isAerial: false,
+            speedMult: 1,
+            swoopAmp: 0,
+            swoopFreq: 0,
+            swoopPhase: 0,
+            cleared: false,
+            smashed: false
+          });
+        }
+      }
+
+      const gapFactor = Math.max(0.45, 0.64 - (diff - 1) * 0.035);
+      const minGap = Math.max(220, speed * gapFactor + (130 - diff * 5));
+      const maxMult = Math.max(1.22, 1.52 - (diff - 1) * 0.045);
+      this.nextGap = randomRange(minGap, minGap * maxMult);
+    }
+
+    update(dt, speed, campusId, score, runPoints, runTime, isPreview, endlessMode, difficulty, timeSec) {
+      const t = timeSec || 0;
       for (let i = this.items.length - 1; i >= 0; i--) {
         const obs = this.items[i];
         if (obs.smashed) {
@@ -677,7 +944,10 @@
           }
           continue;
         }
-        obs.x -= speed * dt;
+        obs.x -= speed * (obs.speedMult || 1) * dt;
+        if (obs.swoopAmp > 0) {
+          obs.y = obs.baseY + Math.sin(t * obs.swoopFreq + obs.swoopPhase) * obs.swoopAmp;
+        }
         if (!obs.cleared && obs.x + obs.w < 132) {
           obs.cleared = true;
           this.clearedCount += 1;
@@ -700,7 +970,7 @@
       }
       const distFromRight = lastActive ? STAGE_W - (lastActive.x + lastActive.w) : Infinity;
       if (distFromRight >= this.nextGap) {
-        this.spawn(campusId, speed, score, runPoints, runTime, isPreview);
+        this.spawn(campusId, speed, score, runPoints, runTime, isPreview, difficulty);
       }
     }
 
