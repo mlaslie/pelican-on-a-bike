@@ -40,3 +40,11 @@ python3 -m http.server 8765
 ```
 
 Then visit `http://localhost:8765/`.
+
+## Install as a Chrome Extension (Manifest V3)
+This repo is also a self-contained **Manifest V3 Chrome extension** (zero extra permissions, runs 100% offline):
+
+1. Clone this repository or click **Code → Download ZIP** on GitHub and unzip it.
+2. Open `chrome://extensions` in Google Chrome and enable **Developer mode** (top-right toggle).
+3. Click **Load unpacked** and select the `pelican-on-a-bike` folder.
+4. Pin **Pelican on a Bike** in your Chrome toolbar and click the pelican icon anytime to open (or focus) the game tab.
