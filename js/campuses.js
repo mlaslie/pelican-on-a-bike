@@ -628,7 +628,7 @@
 
   function drawMountainViewMid(ctx, worldDist) {
     const span = 820;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -639,7 +639,7 @@
 
   function drawMountainViewFore(ctx, worldDist) {
     const span = 480;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 60 || ox + span < -60) continue;
@@ -838,7 +838,7 @@
 
   function drawLondonMid(ctx, worldDist, timeSec) {
     const span = 820;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -853,7 +853,7 @@
 
   function drawLondonFore(ctx, worldDist) {
     const span = 320;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 3; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 40 || ox + span < -40) continue;
@@ -1016,7 +1016,7 @@
 
   function drawTokyoMid(ctx, worldDist, timeSec) {
     const span = 640;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -1027,7 +1027,7 @@
 
   function drawTokyoFore(ctx, worldDist) {
     const span = 340;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 3; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 40 || ox + span < -40) continue;
@@ -1195,7 +1195,7 @@
 
   function drawZurichMid(ctx, worldDist, timeSec) {
     const span = 680;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -1206,7 +1206,7 @@
 
   function drawZurichFore(ctx, worldDist) {
     const span = 380;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 3; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 50 || ox + span < -50) continue;
@@ -1330,7 +1330,7 @@
 
   function drawSydneyMid(ctx, worldDist, timeSec) {
     const span = 680;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -1367,7 +1367,7 @@
 
   function drawSydneyFore(ctx, worldDist) {
     const span = 340;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 3; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 40 || ox + span < -40) continue;
@@ -1460,7 +1460,7 @@
 
   function drawNewYorkMid(ctx, worldDist, timeSec) {
     const span = 740;
-    const shift = modPositive(worldDist * 0.22, span);
+    const shift = modPositive(worldDist * 0.13, span);
     for (let r = -1; r <= 2; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 80 || ox + span < -80) continue;
@@ -1509,7 +1509,7 @@
 
   function drawNewYorkFore(ctx, worldDist) {
     const span = 340;
-    const shift = modPositive(worldDist * 0.55, span);
+    const shift = modPositive(worldDist * 0.30, span);
     for (let r = -1; r <= 3; r++) {
       const ox = -shift + r * span;
       if (ox > STAGE_W + 40 || ox + span < -40) continue;
@@ -1685,23 +1685,38 @@
     }
   }
 
+  function drawAtmosphericVeil(ctx, pA, pB, blend) {
+    const horizon = lerpHexColor(pA.skyHorizon, pB.skyHorizon, blend);
+    ctx.save();
+    const grad = ctx.createLinearGradient(0, 60, 0, GROUND_Y);
+    grad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    grad.addColorStop(0.55, horizon);
+    grad.addColorStop(1, horizon);
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 60, STAGE_W, GROUND_Y - 60);
+    ctx.restore();
+  }
+
   function renderBackdrop(ctx, state) {
     const campusInfo = getCampusState(state.score, state.endlessMode);
     const cur = campusInfo.current;
     const nxt = campusInfo.next;
     const blend = campusInfo.blend;
     const endlessNightBoost = state.endlessMode && campusInfo.cycleIndex % 2 === 1 ? 0.65 : 0;
+    const bgDist = state.bgDist !== undefined ? state.bgDist : state.worldDist;
 
     drawSkyAndSun(ctx, cur.palette, nxt.palette, blend, state.timeSec, endlessNightBoost);
-    drawClouds(ctx, state.worldDist, lerpHexColor(cur.palette.cloudFill, nxt.palette.cloudFill, blend));
+    drawClouds(ctx, bgDist, lerpHexColor(cur.palette.cloudFill, nxt.palette.cloudFill, blend));
 
     if (blend <= 0.01) {
-      drawCampusLayers(ctx, cur.id, state.worldDist, state.timeSec, cur.palette, 1);
+      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, cur.palette, 1);
     } else {
-      drawCampusLayers(ctx, cur.id, state.worldDist, state.timeSec, cur.palette, 1 - blend);
-      drawCampusLayers(ctx, nxt.id, state.worldDist, state.timeSec, nxt.palette, blend);
+      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, cur.palette, 1 - blend);
+      drawCampusLayers(ctx, nxt.id, bgDist, state.timeSec, nxt.palette, blend);
     }
 
+    drawAtmosphericVeil(ctx, cur.palette, nxt.palette, blend);
     drawGround(ctx, state.worldDist, cur.palette, nxt.palette, blend);
     drawMilestoneGates(ctx, state.score, state.endlessMode);
 

@@ -41,6 +41,7 @@
       this.runPoints = 0;
       this.runTime = 0;
       this.worldDist = 0;
+      this.bgDist = 0;
       this.timeSec = 0;
       this.endlessMode = false;
       this.isPreview = false;
@@ -189,6 +190,7 @@
       this.runPoints = 0;
       this.runTime = 0;
       this.worldDist = campus.startScore * this.Campuses.PIXELS_PER_PT;
+      this.bgDist = this.worldDist;
       this.speed = this.computeSpeed();
       this.lastCampusId = campus.id;
       this.visitedCampuses = new Set([campus.id]);
@@ -513,6 +515,7 @@
     setScoreForEvaluation(targetScore) {
       this.score = Math.max(0, targetScore);
       this.worldDist = this.score * this.Campuses.PIXELS_PER_PT;
+      this.bgDist = this.worldDist;
       this.lastMilestoneBucket = Math.floor(this.score / 100);
       if (!this.endlessMode && this.score >= this.Campuses.TOUR_FINISH) {
         this.triggerVictory();
@@ -550,6 +553,7 @@
       const deltaDist = this.speed * dt;
       const deltaScore = deltaDist * SCORE_RATE;
       this.worldDist += deltaDist;
+      this.bgDist += Math.min(this.speed, 400) * dt;
       this.score += deltaScore;
       this.runPoints += deltaScore;
 
@@ -814,6 +818,7 @@
       const campusInfo = this.Campuses.renderBackdrop(ctx, {
         score: this.score,
         worldDist: this.worldDist,
+        bgDist: this.bgDist,
         timeSec: this.timeSec,
         endlessMode: this.endlessMode
       });

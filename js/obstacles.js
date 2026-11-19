@@ -776,7 +776,12 @@
       return;
     }
     drawShadow(ctx, obs.x, obs.w, obs.isAerial);
+    ctx.save();
+    ctx.shadowColor = 'rgba(20, 24, 31, 0.30)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetY = 2;
     drawObstacleBody(ctx, obs, timeSec);
+    ctx.restore();
   }
 
   class ObstacleManager {
