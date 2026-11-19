@@ -397,6 +397,19 @@
 
     engine.startLoop();
 
+    // Direct preview hash for End of the Earth finale (#end-of-earth)
+    if (global.location && global.location.hash === '#end-of-earth') {
+      engine.jumpToEndOfEarth();
+      const startEndingAudioOnGesture = function () {
+        if (engine.state === 'end-of-earth' && AudioMod.playAtariEndingMusic) {
+          AudioMod.unlock();
+          AudioMod.playAtariEndingMusic();
+        }
+      };
+      global.addEventListener('pointerdown', startEndingAudioOnGesture, { once: true });
+      global.addEventListener('keydown', startEndingAudioOnGesture, { once: true });
+    }
+
     // Button listeners
     btnModeNoogler.addEventListener('click', function (e) {
       engine.setSpeedMode('noogler');

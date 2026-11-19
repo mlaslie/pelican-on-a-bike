@@ -2277,7 +2277,7 @@
       else if (c.kind === 'spacer') creditsHeight += 20;
       else creditsHeight += 28;
     }
-    const startY = bottomBound + signH * 0.5 + 8;
+    const startY = bottomBound + signH * 0.35;
     const totalScrollDist = (startY - topBound) + creditsStartOffset + creditsHeight + 80;
     const scrollOffset = modPositive(eoeElapsed * scrollSpeed, totalScrollDist);
     const neonCy = startY - scrollOffset;
