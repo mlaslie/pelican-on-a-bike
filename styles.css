@@ -1290,7 +1290,7 @@ button:disabled {
     display: none;
   }
 
-  body.is-playing .stage-card {
+  body.is-playing:not(.is-mobile-fullscreen) .stage-card {
     width: min(100%, calc((100dvh - 165px) * 960 / 340));
     margin: 0 auto;
   }
@@ -1302,12 +1302,12 @@ button:disabled {
     display: none;
   }
 
-  body.is-playing .touch-controls {
+  body.is-playing:not(.is-mobile-fullscreen) .touch-controls {
     width: min(100%, calc((100dvh - 165px) * 960 / 340));
     margin: 6px auto 0;
   }
 
-  body.is-playing .touch-btn {
+  body.is-playing:not(.is-mobile-fullscreen) .touch-btn {
     min-block-size: 44px;
   }
 }
@@ -1334,18 +1334,8 @@ button:disabled {
   }
 }
 
-/* Mobile Full Screen Arcade Mode */
+/* Full Screen Arcade Mode (Desktop & Mobile) */
 .fullscreen-trigger-btn {
-  display: none;
-}
-
-@media (pointer: coarse) and (hover: none), (max-width: 780px) {
-  .fullscreen-trigger-btn {
-    display: inline-flex;
-  }
-}
-
-.is-touch-device .fullscreen-trigger-btn {
   display: inline-flex;
 }
 
@@ -1443,18 +1433,29 @@ body.is-mobile-fullscreen .stage-overlay {
 }
 
 body.is-mobile-fullscreen .touch-controls {
+  display: none;
   position: fixed;
   left: 6px;
   right: 6px;
   bottom: max(6px, env(safe-area-inset-bottom));
   margin: 0;
-  width: auto;
+  width: calc(100% - 12px);
+  max-width: none;
   z-index: 1020;
-  display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 12px;
   pointer-events: none;
+}
+
+@media (pointer: coarse) and (hover: none), (max-width: 780px) {
+  body.is-mobile-fullscreen .touch-controls {
+    display: flex;
+  }
+}
+
+.is-touch-device body.is-mobile-fullscreen .touch-controls {
+  display: flex;
 }
 
 body.is-mobile-fullscreen .touch-btn {

@@ -630,6 +630,18 @@
         return;
       }
 
+      if (code === 'KeyF') {
+        e.preventDefault();
+        setMobileFullscreen(!isMobileFullscreen);
+        return;
+      }
+
+      if (code === 'Escape' && isMobileFullscreen) {
+        e.preventDefault();
+        setMobileFullscreen(false);
+        return;
+      }
+
       if (code === 'KeyP' || code === 'Escape') {
         if (engine.state === 'playing' || engine.state === 'paused') {
           e.preventDefault();
