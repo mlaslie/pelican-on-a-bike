@@ -94,17 +94,6 @@ h1 {
   letter-spacing: -0.02em;
 }
 
-.benchmark-pill {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--g-blue);
-  background-color: var(--g-blue-soft);
-  border: 1px solid #c6dafc;
-  border-radius: 999px;
-  padding: 2px 10px;
-}
-
 .subtitle {
   margin: 3px 0 0;
   font-size: 0.9rem;
