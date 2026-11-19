@@ -342,10 +342,9 @@
     return Math.floor((score - 2800) / 100) % 2 === 1;
   }
 
-  function getCampusState(score, endlessMode, secretTour) {
-    const useSecretSpan = Boolean(secretTour || score >= TOUR_FINISH);
-    const totalSpan = useSecretSpan ? SECRET_FINISH : TOUR_FINISH;
-    const maxCount = useSecretSpan ? LIST.length : 6;
+  function getCampusState(score, endlessMode) {
+    const totalSpan = SECRET_FINISH;
+    const maxCount = LIST.length;
     const wrappedScore = endlessMode ? modPositive(score, totalSpan) : clamp(score, 0, totalSpan - 0.001);
     const idx = Math.min(maxCount - 1, Math.floor(wrappedScore / CAMPUS_SPAN));
     const current = LIST[idx];
@@ -2427,7 +2426,7 @@
     for (let i = 0; i < gates.length; i++) {
       const g = gates[i];
       const rel = endlessMode
-        ? modPositive(g.targetScore - modPositive(score, TOUR_FINISH) + 300, TOUR_FINISH) - 300
+        ? modPositive(g.targetScore - modPositive(score, SECRET_FINISH) + 300, SECRET_FINISH) - 300
         : g.targetScore - score;
       const gx = pelicanFrontX + rel * PIXELS_PER_PT;
       if (gx < -160 || gx > STAGE_W + 160) continue;
@@ -2447,45 +2446,6 @@
       ctx.font = '700 10.5px -apple-system, BlinkMacSystemFont, sans-serif';
       ctx.fillText(g.sub, gx, GROUND_Y - 105);
       ctx.restore();
-    }
-
-    // Grand World Tour Finish Line Gantry at score = 1400 in Tour Mode
-    if (!endlessMode) {
-      const fx = pelicanFrontX + (TOUR_FINISH - score) * PIXELS_PER_PT;
-      if (fx >= -180 && fx <= STAGE_W + 180) {
-        ctx.save();
-        // Gantry pillars
-        ctx.fillStyle = '#ffffff';
-        ctx.strokeStyle = '#5f6368';
-        ctx.lineWidth = 2;
-        ctx.fillRect(fx - 6, GROUND_Y - 150, 10, 150);
-        ctx.strokeRect(fx - 6, GROUND_Y - 150, 10, 150);
-
-        // Top finish banner
-        ctx.fillStyle = '#202124';
-        ctx.beginPath();
-        ctx.roundRect(fx - 86, GROUND_Y - 168, 172, 34, 8);
-        ctx.fill();
-
-        // 4-color Google ribbon
-        const cols = ['#4285F4', '#EA4335', '#FBBC04', '#34A853'];
-        for (let c = 0; c < 4; c++) {
-          ctx.fillStyle = cols[c];
-          ctx.fillRect(fx - 86 + c * 43, GROUND_Y - 138, 43, 4);
-        }
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '800 12px ui-monospace, Menlo, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText('WORLD TOUR FINISH', fx, GROUND_Y - 147);
-
-        // Checkered road tape
-        for (let sq = 0; sq < 6; sq++) {
-          ctx.fillStyle = sq % 2 === 0 ? '#ffffff' : '#202124';
-          ctx.fillRect(fx - 4, GROUND_Y + 6 + sq * 8, 8, 8);
-        }
-        ctx.restore();
-      }
     }
   }
 

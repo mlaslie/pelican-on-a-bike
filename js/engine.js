@@ -9,7 +9,7 @@
   const HI_GOOGLER_KEY = 'pelicanBikeHighScoreGoogler';
   const HI_NOOGLER_KEY = 'pelicanBikeHighScoreNoogler';
   const SPEED_MODE_KEY = 'pelicanBikeSpeedMode';
-  const SECRETS_UNLOCKED_KEY = 'pelicanBikeSecretsUnlocked';
+  const SECRET_LEVEL_KEY = 'pelicanBikeSecretLevel';
   const NOOGLER_SPEED = 380;
   const GOOGLER_START_SPEED = 370;
   const GOOGLER_TOUR_MAX_SPEED = 720;
@@ -45,8 +45,8 @@
       this.bgDist = 0;
       this.timeSec = 0;
       this.endlessMode = false;
-      this.secretTour = false;
-      this.secretsUnlocked = false;
+      this.secretTour = true;
+      this.secretUnlockCount = 0;
       this.isPreview = false;
       this.startCampusId = 'sydney';
       this.lastCampusId = 'sydney';
@@ -82,8 +82,9 @@
         if (!Number.isNaN(storedN) && storedN > 0) {
           this.highScores.noogler = storedN;
         }
-        if (global.localStorage.getItem(SECRETS_UNLOCKED_KEY) === '1') {
-          this.secretsUnlocked = true;
+        const storedSecret = parseInt(global.localStorage.getItem(SECRET_LEVEL_KEY) || '0', 10);
+        if (!Number.isNaN(storedSecret) && storedSecret > 0) {
+          this.secretUnlockCount = clamp(storedSecret, 0, 3);
         }
       } catch (_) {}
 
@@ -222,28 +223,35 @@
       this.emitHud(true);
     }
 
-    unlockSecrets(showToast) {
-      const wasUnlocked = this.secretsUnlocked;
-      this.secretsUnlocked = true;
+    unlockSecretUpTo(levelCount, showToast) {
+      const target = clamp(levelCount || 0, 0, 3);
+      if (target <= this.secretUnlockCount) return false;
+      this.secretUnlockCount = target;
       try {
-        global.localStorage.setItem(SECRETS_UNLOCKED_KEY, '1');
+        global.localStorage.setItem(SECRET_LEVEL_KEY, String(this.secretUnlockCount));
       } catch (_) {}
-      if (showToast && !wasUnlocked) {
-        this.Audio.playVictory();
+      if (showToast) {
+        const names = ['', 'Lvl 7 · The Cloud (TPU Data Center)', 'Lvl 8 · Google X → The Moon', 'Lvl 9 · Chrome Dino Desert'];
+        this.Audio.playMilestone();
         this.toast = {
-          kicker: 'SECRET LEVELS UNLOCKED!',
-          title: 'Lvl 7 Cloud · Lvl 8 Moon · Lvl 9 Dino Desert',
+          kicker: 'SECRET LEVEL UNLOCKED!',
+          title: names[this.secretUnlockCount] || 'Secret Level',
           color: '#00E5FF',
-          timer: 3.4,
-          duration: 3.4
+          timer: 3.0,
+          duration: 3.0
         };
       }
       this.emitState();
-      return !wasUnlocked;
+      return true;
+    }
+
+    unlockNextSecret(showToast) {
+      if (this.secretUnlockCount >= 3) return false;
+      return this.unlockSecretUpTo(this.secretUnlockCount + 1, showToast);
     }
 
     enterSecretLevels() {
-      this.unlockSecrets(false);
+      this.unlockSecretUpTo(1, false);
       this.secretTour = true;
       this.endlessMode = false;
       this.score = Math.max(this.score, this.Campuses.TOUR_FINISH);
@@ -680,17 +688,13 @@
         }
       }
 
-      // World Tour Finish (6-campus) or Secret World Finale (End of the Earth)
-      if (!this.endlessMode && !this.secretTour && this.score >= this.Campuses.TOUR_FINISH) {
-        this.triggerVictory();
-        return;
-      }
-      if (!this.endlessMode && this.secretTour && this.score >= this.Campuses.SECRET_FINISH) {
+      // Seamless flow past Mountain View (2100) into Secret Levels 7 -> 8 -> 9 -> End of the Earth (3150)
+      if (!this.endlessMode && this.score >= this.Campuses.SECRET_FINISH) {
         this.triggerEndOfEarth();
         return;
       }
 
-      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
+      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode);
       const activeCampus = campusState.current;
       this.visitedCampuses.add(activeCampus.id);
       this.pelican.setGravityScale(activeCampus.id === 'moonshot-moon' ? 0.72 : 1);
@@ -698,6 +702,13 @@
 
       if (activeCampus.id !== this.lastCampusId) {
         this.lastCampusId = activeCampus.id;
+        if (activeCampus.id === 'cloud-tpu') {
+          this.unlockSecretUpTo(1, false);
+        } else if (activeCampus.id === 'moonshot-moon') {
+          this.unlockSecretUpTo(2, false);
+        } else if (activeCampus.id === 'dino-desert') {
+          this.unlockSecretUpTo(3, false);
+        }
         this.showCampusToast(activeCampus);
         this.pelican.ringBell();
         this.Audio.playBikeBell();
@@ -980,7 +991,7 @@
         campus: campusState.current,
         endlessMode: this.endlessMode,
         secretTour: this.secretTour,
-        secretsUnlocked: this.secretsUnlocked,
+        secretUnlockCount: this.secretUnlockCount,
         isPreview: this.isPreview,
         speedMode: this.speedMode,
         speed: this.speed,

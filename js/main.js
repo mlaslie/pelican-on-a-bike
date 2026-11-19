@@ -51,6 +51,8 @@
     const overlayRevive = document.getElementById('overlay-revive');
     const overlayGameover = document.getElementById('overlay-gameover');
     const secretPickerSection = document.getElementById('secret-picker-section');
+    const secretPickerTitle = document.getElementById('secret-picker-title');
+    const secretPills = Array.from(document.querySelectorAll('.campus-pill-secret[data-secret-index]'));
 
     const btnStartTour = document.getElementById('btn-start-tour');
     const btnResumeTour = document.getElementById('btn-resume-tour');
@@ -152,7 +154,15 @@
       overlayRevive.hidden = st !== 'revive';
       overlayGameover.hidden = st !== 'gameover';
       if (secretPickerSection) {
-        secretPickerSection.hidden = !snapshot.secretsUnlocked;
+        const unlocked = snapshot.secretUnlockCount || 0;
+        secretPickerSection.hidden = unlocked <= 0;
+        if (secretPickerTitle) {
+          secretPickerTitle.textContent = unlocked === 1 ? 'Secret Level Unlocked' : 'Secret Levels Unlocked';
+        }
+        for (let i = 0; i < secretPills.length; i++) {
+          const idx = parseInt(secretPills[i].dataset.secretIndex || '99', 10);
+          secretPills[i].hidden = idx > unlocked;
+        }
       }
 
       const canPause = st === 'playing' || st === 'paused';
@@ -402,14 +412,14 @@
       if (e.detail > 0) canvas.focus();
     });
 
-    // Easter Egg: Ring the Bike Bell 5 times to unlock the 3 Secret Levels!
+    // Easter Egg: Every 5 Bike Bell rings reveals the next Secret Level one at a time
     let bellEasterCount = 0;
     function handleBellRing() {
       engine.ringBell();
       bellEasterCount += 1;
-      if (bellEasterCount >= 5 && !engine.secretsUnlocked) {
-        engine.unlockSecrets(true);
-        announce('Secret levels unlocked! The Cloud, The Moon, and Chrome Dino Desert.');
+      if (bellEasterCount % 5 === 0 && engine.secretUnlockCount < 3) {
+        engine.unlockNextSecret(true);
+        announce('New secret level unlocked!');
       }
     }
 

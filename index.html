@@ -430,12 +430,12 @@
 
       <section id="secret-picker-section" class="picker-section secret-picker-section" aria-label="Secret Levels" hidden>
         <div class="picker-header">
-          <h2>Secret Levels Unlocked — Beyond Earth</h2>
-          <p class="picker-note">Conquer all 3 to reach the End of the Earth (3,150 pts).</p>
+          <h2 id="secret-picker-title">Secret Level Unlocked</h2>
+          <p id="secret-picker-note" class="picker-note">Keep pedaling to discover what lies beyond...</p>
         </div>
 
         <div class="campus-picker" role="group" aria-label="Jump to secret level">
-          <button type="button" class="campus-pill campus-pill-secret" data-campus="cloud-tpu">
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="cloud-tpu" data-secret-index="1" hidden>
             <span class="pill-swatch pill-neon-cyan" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">The Cloud <span class="pill-rank pill-rank-secret">LVL 7 · SECRET</span></span>
@@ -444,7 +444,7 @@
             <span class="pill-range">2100 pts</span>
           </button>
 
-          <button type="button" class="campus-pill campus-pill-secret" data-campus="moonshot-moon">
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="moonshot-moon" data-secret-index="2" hidden>
             <span class="pill-swatch pill-neon-violet" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">The Moon <span class="pill-rank pill-rank-secret">LVL 8 · SECRET</span></span>
@@ -453,7 +453,7 @@
             <span class="pill-range">2450 pts</span>
           </button>
 
-          <button type="button" class="campus-pill campus-pill-secret" data-campus="dino-desert">
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="dino-desert" data-secret-index="3" hidden>
             <span class="pill-swatch pill-dino-gray" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">Dino Desert <span class="pill-rank pill-rank-secret">LVL 9 · SECRET</span></span>
