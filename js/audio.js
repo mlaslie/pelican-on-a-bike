@@ -33,6 +33,9 @@
     try {
       global.localStorage.setItem(STORAGE_KEY, String(muted));
     } catch (_) {}
+    if (muted) {
+      stopEndingMusic();
+    }
     return muted;
   }
 
@@ -371,6 +374,119 @@
     triggerBellRing(ac, now + 0.25, 0.28);
   }
 
+  // Retro Atari / 8-bit arcade victory chiptune loop for End of the Earth
+  let endingTimer = null;
+  let endingNodes = [];
+
+  function stopEndingMusic() {
+    if (endingTimer !== null) {
+      global.clearTimeout(endingTimer);
+      endingTimer = null;
+    }
+    for (let i = 0; i < endingNodes.length; i++) {
+      try {
+        endingNodes[i].stop();
+      } catch (_) {}
+      try {
+        endingNodes[i].disconnect();
+      } catch (_) {}
+    }
+    endingNodes = [];
+  }
+
+  function scheduleAtariBar(ac, startTime) {
+    // Classic uplifting C-major -> G -> Am -> F -> G -> C 8-bit arcade ending melody
+    const step = 0.135;
+    const lead = [
+      // Bar 1 (C major fanfare)
+      [0, 523.25, 1], [1, 659.25, 1], [2, 783.99, 1], [3, 1046.5, 2],
+      [5, 783.99, 1], [6, 880.0, 1], [7, 783.99, 1],
+      // Bar 2 (G major)
+      [8, 659.25, 2], [10, 587.33, 1], [11, 659.25, 1], [12, 783.99, 3],
+      // Bar 3 (A minor -> F major heroic climb)
+      [16, 880.0, 1], [17, 783.99, 1], [18, 659.25, 1], [19, 523.25, 1],
+      [20, 698.46, 2], [22, 880.0, 2],
+      // Bar 4 (G7 -> C triumphant resolve + arpeggio flourish)
+      [24, 783.99, 1], [25, 659.25, 1], [26, 587.33, 1], [27, 783.99, 1],
+      [28, 1046.5, 3], [31, 1318.51, 1],
+      // Bar 5 (Sparkling Atari starlight bridge)
+      [32, 1174.66, 1], [33, 1046.5, 1], [34, 880.0, 1], [35, 1046.5, 1],
+      [36, 987.77, 2], [38, 783.99, 2],
+      // Bar 6 (Warm nostalgic turnaround)
+      [40, 698.46, 1], [41, 783.99, 1], [42, 880.0, 1], [43, 1046.5, 1],
+      [44, 1174.66, 2], [46, 1046.5, 1], [47, 987.77, 1],
+      // Bar 7 (Grand finale cadence)
+      [48, 1046.5, 2], [50, 783.99, 1], [51, 659.25, 1],
+      [52, 783.99, 2], [54, 1046.5, 2],
+      [56, 1318.51, 4], [60, 1046.5, 4]
+    ];
+
+    const bass = [
+      [0, 130.81, 4], [4, 164.81, 4], [8, 196.0, 4], [12, 146.83, 4],
+      [16, 220.0, 4], [20, 174.61, 4], [24, 196.0, 4], [28, 130.81, 4],
+      [32, 174.61, 4], [36, 196.0, 4], [40, 174.61, 4], [44, 196.0, 4],
+      [48, 130.81, 4], [52, 196.0, 4], [56, 130.81, 4], [60, 130.81, 4]
+    ];
+
+    for (let i = 0; i < lead.length; i++) {
+      const s = lead[i][0];
+      const freq = lead[i][1];
+      const len = lead[i][2] * step * 0.88;
+      const t0 = startTime + s * step;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.042, t0 + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + len);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(t0);
+      osc.stop(t0 + len + 0.015);
+      endingNodes.push(osc);
+    }
+
+    for (let i = 0; i < bass.length; i++) {
+      const s = bass[i][0];
+      const freq = bass[i][1];
+      const len = bass[i][2] * step * 0.92;
+      const t0 = startTime + s * step;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(0.075, t0 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + len);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(t0);
+      osc.stop(t0 + len + 0.02);
+      endingNodes.push(osc);
+    }
+
+    return 64 * step;
+  }
+
+  function playAtariEndingMusic() {
+    stopEndingMusic();
+    const ac = ensureContext();
+    if (!ac) return;
+    function loop() {
+      if (muted) {
+        stopEndingMusic();
+        return;
+      }
+      const ctxNow = ensureContext();
+      if (!ctxNow) return;
+      endingNodes = [];
+      const dur = scheduleAtariBar(ctxNow, ctxNow.currentTime + 0.04);
+      endingTimer = global.setTimeout(loop, Math.round(dur * 1000));
+    }
+    loop();
+  }
+
   global.PelicanGame = global.PelicanGame || {};
   global.PelicanGame.Audio = {
     isMuted: isMuted,
@@ -386,6 +502,8 @@
     playGeminiPowerup: playGeminiPowerup,
     playCollectG: playCollectG,
     playObstacleSmash: playObstacleSmash,
-    playRevive: playRevive
+    playRevive: playRevive,
+    playAtariEndingMusic: playAtariEndingMusic,
+    stopEndingMusic: stopEndingMusic
   };
 })(window);

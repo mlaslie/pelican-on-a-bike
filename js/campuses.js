@@ -2240,90 +2240,184 @@
     ctx.restore();
     ctx.restore(); // end wooden sign
 
-    // 4. Lit-Up Neon Sign over the Cosmos: "THANKS FOR PLAYING" / "MADE BY GEMINI NEON"
+    // 4. Scrolling Neon Sign + Retro Atari End Credits rising from the bottom of the cosmos!
+    const eoeElapsed = state.eoeElapsed || 0;
     const isNarrow = viewWidth < 620;
-    const neonCx = isNarrow ? (viewOffsetX + viewWidth * 0.5) : 648;
-    const neonCy = isNarrow ? Math.max(58, -stageTop * 0.35 + 88) : 138;
+    const scrollCx = isNarrow ? (viewOffsetX + viewWidth * 0.5) : 565;
     const signW = isNarrow ? Math.min(viewWidth - 26, 430) : 458;
     const signH = isNarrow ? 106 : 124;
+
+    const topBound = -stageTop - 40;
+    const bottomBound = viewHeight - stageTop + 20;
+    const scrollSpeed = 42; // crisp readable arcade scroll speed (px/s)
+
+    const credits = [
+      { kind: 'header', text: '★ PELICAN ON A BIKE ★' },
+      { kind: 'sub', text: 'GOOGLE CAMPUS WORLD TOUR' },
+      { kind: 'spacer' },
+      { kind: 'role', label: 'CREATOR', name: 'MATT LASLIE', gold: true },
+      { kind: 'role', label: 'GAME DESIGN', name: 'GEMINI NEON' },
+      { kind: 'role', label: 'WORLD & LEVEL ART', name: 'GEMINI NEON' },
+      { kind: 'role', label: 'SVG PELICAN ENGINEERING', name: 'GEMINI NEON' },
+      { kind: 'role', label: 'PHYSICS & LOW-G MOON MATH', name: 'GEMINI NEON' },
+      { kind: 'role', label: 'PIXEL CACTUS CURATION', name: 'GEMINI NEON' },
+      { kind: 'role', label: '8-BIT ATARI SOUNDTRACK', name: 'GEMINI NEON' },
+      { kind: 'role', label: 'END OF THE EARTH SIGNMAKING', name: 'GEMINI NEON' },
+      { kind: 'spacer' },
+      { kind: 'sub', text: 'BUILT IN GOOGLE ANTIGRAVITY' },
+      { kind: 'end', text: '— THE END —' }
+    ];
+
+    // Compute total scroll height so the sequence loops cleanly after "THE END" exits top
+    const creditsStartOffset = signH * 0.5 + 88;
+    let creditsHeight = 0;
+    for (let i = 0; i < credits.length; i++) {
+      const c = credits[i];
+      if (c.kind === 'role') creditsHeight += 48;
+      else if (c.kind === 'spacer') creditsHeight += 20;
+      else creditsHeight += 28;
+    }
+    const startY = bottomBound + signH * 0.5 + 8;
+    const totalScrollDist = (startY - topBound) + creditsStartOffset + creditsHeight + 80;
+    const scrollOffset = modPositive(eoeElapsed * scrollSpeed, totalScrollDist);
+    const neonCy = startY - scrollOffset;
 
     // Realistic subtle neon tube hum / flicker
     const flicker = 0.94 + 0.06 * Math.sin(timeSec * 19.0) * Math.sin(timeSec * 3.7);
     const pulse = 0.88 + 0.12 * Math.sin(timeSec * 2.6);
 
+    // Draw Neon Sign while within visible cosmos band
+    if (neonCy + signH * 0.5 > topBound - 30 && neonCy - signH * 0.5 < bottomBound + 30) {
+      ctx.save();
+      ctx.translate(scrollCx, neonCy);
+
+      // Subtle dark glass backing so neon pops cleanly
+      ctx.fillStyle = 'rgba(6, 9, 24, 0.45)';
+      ctx.beginPath();
+      ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
+      ctx.fill();
+
+      // Glowing outer neon border tube
+      ctx.save();
+      ctx.globalAlpha = flicker;
+      ctx.strokeStyle = '#38e8ff';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 18 * pulse;
+      ctx.beginPath();
+      ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#d6fbff';
+      ctx.lineWidth = 1.2;
+      ctx.shadowBlur = 6;
+      ctx.stroke();
+      ctx.restore();
+
+      // MAIN NEON TEXT: "THANKS FOR PLAYING"
+      const mainFontSize = isNarrow ? 25 : 32;
+      ctx.font = '900 ' + mainFontSize + 'px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.save();
+      ctx.globalAlpha = flicker;
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 24 * pulse;
+      ctx.strokeStyle = '#00d9ff';
+      ctx.lineWidth = 4;
+      ctx.strokeText('THANKS FOR PLAYING', 0, -16);
+      ctx.shadowColor = '#7ef9ff';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#c8fbff';
+      ctx.fillText('THANKS FOR PLAYING', 0, -16);
+      ctx.shadowBlur = 2;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('THANKS FOR PLAYING', 0, -16);
+      ctx.restore();
+
+      // SUBTEXT NEON: "MADE BY GEMINI NEON"
+      const subFontSize = isNarrow ? 14.5 : 17.5;
+      ctx.font = '800 ' + subFontSize + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+
+      ctx.save();
+      ctx.globalAlpha = 0.95 + 0.05 * Math.sin(timeSec * 13.0 + 1.1);
+      ctx.shadowColor = '#ff2df0';
+      ctx.shadowBlur = 20 * pulse;
+      ctx.strokeStyle = '#ff3df5';
+      ctx.lineWidth = 3;
+      ctx.strokeText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+      ctx.shadowColor = '#ff9ef8';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ffd1fc';
+      ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+      ctx.shadowBlur = 2;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+      ctx.restore();
+
+      ctx.restore();
+    }
+
+    // Draw Atari-Style Retro Arcade Credits rolling right underneath the Neon Sign
     ctx.save();
-    ctx.translate(neonCx, neonCy);
-
-    // Subtle dark glass backing so neon pops cleanly
-    ctx.fillStyle = 'rgba(6, 9, 24, 0.42)';
-    ctx.beginPath();
-    ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
-    ctx.fill();
-
-    // Glowing outer neon border tube (dual-tone cyan/magenta)
-    ctx.save();
-    ctx.globalAlpha = flicker;
-    ctx.strokeStyle = '#38e8ff';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = '#00e5ff';
-    ctx.shadowBlur = 18 * pulse;
-    ctx.beginPath();
-    ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
-    ctx.stroke();
-
-    // Inner bright tube filament
-    ctx.strokeStyle = '#d6fbff';
-    ctx.lineWidth = 1.2;
-    ctx.shadowBlur = 6;
-    ctx.stroke();
-    ctx.restore();
-
-    // MAIN NEON TEXT: "THANKS FOR PLAYING"
-    const mainFontSize = isNarrow ? 25 : 32;
-    ctx.font = '900 ' + mainFontSize + 'px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
+    let curY = neonCy + creditsStartOffset;
+    for (let i = 0; i < credits.length; i++) {
+      const c = credits[i];
+      if (c.kind === 'spacer') {
+        curY += 20;
+        continue;
+      }
+      const inView = curY > topBound && curY < bottomBound;
+      if (c.kind === 'header') {
+        if (inView) {
+          ctx.font = '900 ' + (isNarrow ? 16 : 19) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+          ctx.shadowColor = '#00e5ff';
+          ctx.shadowBlur = 12;
+          ctx.fillStyle = '#7ef9ff';
+          ctx.fillText(c.text, scrollCx, curY);
+        }
+        curY += 28;
+      } else if (c.kind === 'sub') {
+        if (inView) {
+          ctx.font = '700 ' + (isNarrow ? 11 : 12.5) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+          ctx.shadowColor = 'rgba(0, 229, 255, 0.45)';
+          ctx.shadowBlur = 6;
+          ctx.fillStyle = '#b8d0f0';
+          ctx.fillText(c.text, scrollCx, curY);
+        }
+        curY += 28;
+      } else if (c.kind === 'role') {
+        if (inView) {
+          // Retro Atari role label
+          ctx.font = '700 ' + (isNarrow ? 10.5 : 11.5) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+          ctx.shadowColor = 'rgba(0, 229, 255, 0.5)';
+          ctx.shadowBlur = 6;
+          ctx.fillStyle = '#7ef9ff';
+          ctx.fillText(c.label, scrollCx, curY);
 
-    // Outer cyan glow pass
-    ctx.save();
-    ctx.globalAlpha = flicker;
-    ctx.shadowColor = '#00e5ff';
-    ctx.shadowBlur = 24 * pulse;
-    ctx.strokeStyle = '#00d9ff';
-    ctx.lineWidth = 4;
-    ctx.strokeText('THANKS FOR PLAYING', 0, -16);
-    // Mid bright glow pass
-    ctx.shadowColor = '#7ef9ff';
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = '#c8fbff';
-    ctx.fillText('THANKS FOR PLAYING', 0, -16);
-    // White-hot neon core
-    ctx.shadowBlur = 2;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('THANKS FOR PLAYING', 0, -16);
-    ctx.restore();
-
-    // SUBTEXT NEON: "MADE BY GEMINI NEON"
-    const subFontSize = isNarrow ? 14.5 : 17.5;
-    ctx.font = '800 ' + subFontSize + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
-
-    ctx.save();
-    ctx.globalAlpha = 0.95 + 0.05 * Math.sin(timeSec * 13.0 + 1.1);
-    ctx.shadowColor = '#ff2df0';
-    ctx.shadowBlur = 20 * pulse;
-    ctx.strokeStyle = '#ff3df5';
-    ctx.lineWidth = 3;
-    ctx.strokeText('✦ MADE BY GEMINI NEON ✦', 0, 24);
-    ctx.shadowColor = '#ff9ef8';
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = '#ffd1fc';
-    ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
-    ctx.shadowBlur = 2;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
-    ctx.restore();
-
-    ctx.restore(); // end neon sign
+          // Name in glowing Atari gold (Matt Laslie) or neon magenta (Gemini Neon)
+          ctx.font = '900 ' + (isNarrow ? 15.5 : 18) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+          ctx.shadowColor = c.gold ? '#ffb300' : '#ff2df0';
+          ctx.shadowBlur = 14;
+          ctx.fillStyle = c.gold ? '#ffeb3b' : '#ff9ef8';
+          ctx.fillText(c.name, scrollCx, curY + 19);
+        }
+        curY += 48;
+      } else if (c.kind === 'end') {
+        if (inView) {
+          ctx.font = '900 ' + (isNarrow ? 16 : 20) + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+          ctx.shadowColor = '#ffeb3b';
+          ctx.shadowBlur = 16;
+          ctx.fillStyle = '#fff59d';
+          ctx.fillText(c.text, scrollCx, curY + 8);
+        }
+        curY += 36;
+      }
+    }
+    ctx.restore(); // end credits
     ctx.restore(); // end cosmos
   }
 

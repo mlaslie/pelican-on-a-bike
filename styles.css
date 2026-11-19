@@ -1428,8 +1428,8 @@ body.is-mobile-fullscreen .stage-overlay {
 
 body.is-mobile-fullscreen .touch-controls {
   position: fixed;
-  left: max(6px, env(safe-area-inset-left));
-  right: max(6px, env(safe-area-inset-right));
+  left: 6px;
+  right: 6px;
   bottom: max(6px, env(safe-area-inset-bottom));
   margin: 0;
   width: auto;
@@ -1490,8 +1490,8 @@ body.is-mobile-fullscreen .touch-jump {
   }
 
   body.is-mobile-fullscreen .touch-controls {
-    left: max(6px, env(safe-area-inset-left));
-    right: max(6px, env(safe-area-inset-right));
+    left: 6px;
+    right: 6px;
     bottom: max(5px, env(safe-area-inset-bottom));
   }
 

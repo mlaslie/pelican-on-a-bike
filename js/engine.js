@@ -44,6 +44,7 @@
       this.worldDist = 0;
       this.bgDist = 0;
       this.timeSec = 0;
+      this.eoeElapsed = 0;
       this.endlessMode = false;
       this.secretTour = true;
       this.secretUnlockCount = 0;
@@ -187,6 +188,7 @@
     }
 
     startTour(campusId) {
+      if (this.Audio.stopEndingMusic) this.Audio.stopEndingMusic();
       const targetId = campusId || 'sydney';
       const campus = this.Campuses.getCampusById(targetId);
 
@@ -273,6 +275,7 @@
 
     triggerEndOfEarth() {
       this.state = 'end-of-earth';
+      this.eoeElapsed = 0;
       this.score = Math.max(this.score, this.Campuses.SECRET_FINISH);
       this.pelican.y = GROUND_Y;
       this.pelican.vy = 0;
@@ -284,7 +287,11 @@
       this.obstacles.reset();
       this.powerups.reset();
       this.toast = null;
-      this.Audio.playVictory();
+      if (this.Audio.playAtariEndingMusic) {
+        this.Audio.playAtariEndingMusic();
+      } else {
+        this.Audio.playVictory();
+      }
       this.saveHighScoreIfEligible();
       this.emitHud(true);
       this.emitState();
@@ -301,6 +308,7 @@
     }
 
     continueEndless() {
+      if (this.Audio.stopEndingMusic) this.Audio.stopEndingMusic();
       this.endlessMode = true;
       this.pelican.setHappy(false);
       this.state = 'playing';
@@ -633,7 +641,13 @@
         return;
       }
 
-      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive' || this.state === 'respawn-unlocked' || this.state === 'end-of-earth') {
+      if (this.state === 'end-of-earth') {
+        this.eoeElapsed += dt;
+        this.pelican.update(dt, 0, false, false);
+        return;
+      }
+
+      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive' || this.state === 'respawn-unlocked') {
         this.pelican.update(dt, 0, false, false);
         return;
       }
@@ -901,6 +915,7 @@
         }
         this.Campuses.renderEndOfEarth(ctx, {
           timeSec: this.timeSec,
+          eoeElapsed: this.eoeElapsed,
           viewWidth: this.viewWidth,
           viewOffsetX: this.viewOffsetX,
           viewHeight: this.viewHeight,
