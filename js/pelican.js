@@ -35,7 +35,12 @@
   class PelicanRider {
     constructor() {
       this.x = ANCHOR_X;
+      this.touchMode = false;
       this.reset();
+    }
+
+    setTouchMode(active) {
+      this.touchMode = Boolean(active);
     }
 
     reset() {
@@ -82,7 +87,7 @@
 
     pressJump() {
       this.jumpHeld = true;
-      this.jumpBufferTimer = JUMP_BUFFER;
+      this.jumpBufferTimer = this.touchMode ? 0.135 : JUMP_BUFFER;
     }
 
     releaseJump() {
@@ -153,7 +158,7 @@
 
       // Coyote & buffer timers
       if (this.grounded) {
-        this.coyoteTimer = COYOTE_TIME;
+        this.coyoteTimer = this.touchMode ? 0.095 : COYOTE_TIME;
       } else {
         this.coyoteTimer = Math.max(0, this.coyoteTimer - dt);
       }

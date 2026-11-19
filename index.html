@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f9fa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <title>Pelican on a Bike — Google Campus World Tour</title>
   <link rel="icon" type="image/png" href="icons/icon-48.png">
+  <link rel="apple-touch-icon" href="icons/icon-128.png">
   <link rel="stylesheet" href="styles.css">
   <script defer src="js/audio.js"></script>
   <script defer src="js/campuses.js"></script>
@@ -137,7 +142,8 @@
                   Start Tour <kbd class="btn-kbd" aria-hidden="true">Space</kbd>
                 </button>
               </div>
-              <p class="overlay-hint">Switch between Noogler (steady) and Googler (accelerating) above</p>
+              <p id="start-hint-desktop" class="overlay-hint">Press Space, Up Arrow, or click canvas to ride</p>
+              <p id="start-hint-touch" class="overlay-hint">Tap right side to jump · Hold left or swipe ↓ to duck</p>
             </div>
           </div>
 
@@ -285,35 +291,46 @@
             <div class="route-stops" aria-hidden="true">
               <span class="route-stop" data-stop="sydney" style="left: 0%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">SYD · 0</span>
+                <span class="stop-text">SYD<span class="stop-pts"> · 0</span></span>
               </span>
               <span class="route-stop" data-stop="zurich" style="left: 16.67%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">ZRH · 350</span>
+                <span class="stop-text">ZRH<span class="stop-pts"> · 350</span></span>
               </span>
               <span class="route-stop" data-stop="london" style="left: 33.33%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">LDN · 700</span>
+                <span class="stop-text">LDN<span class="stop-pts"> · 700</span></span>
               </span>
               <span class="route-stop" data-stop="new-york" style="left: 50%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">NYC · 1050</span>
+                <span class="stop-text">NYC<span class="stop-pts"> · 1050</span></span>
               </span>
               <span class="route-stop" data-stop="tokyo" style="left: 66.67%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">TYO · 1400</span>
+                <span class="stop-text">TYO<span class="stop-pts"> · 1400</span></span>
               </span>
               <span class="route-stop" data-stop="mountain-view" style="left: 83.33%">
                 <span class="stop-dot"></span>
-                <span class="stop-text">MTV · 1750</span>
+                <span class="stop-text">MTV<span class="stop-pts"> · 1750</span></span>
               </span>
               <span class="route-stop route-stop-finish" style="left: 100%">
-                <span class="stop-flag">FINISH · 2100</span>
+                <span class="stop-flag">FIN<span class="stop-pts">ISH · 2100</span></span>
               </span>
             </div>
           </div>
         </div>
       </section>
+
+      <div class="touch-controls" aria-label="Touch controls">
+        <button id="btn-touch-duck" type="button" class="touch-btn touch-duck">
+          <span aria-hidden="true">↓</span> DUCK / FAST-FALL
+        </button>
+        <button id="btn-touch-jump" type="button" class="touch-btn touch-jump">
+          <span aria-hidden="true">↑</span> JUMP
+        </button>
+      </div>
+
+      <p class="mobile-rotate-tip">Tip: Swipe ↓ or tap left side to duck · Rotate phone for wide view</p>
 
       <section class="picker-section" aria-labelledby="picker-heading">
         <div class="picker-header">
@@ -377,15 +394,6 @@
           </button>
         </div>
       </section>
-
-      <div class="touch-controls" aria-label="Touch controls">
-        <button id="btn-touch-duck" type="button" class="touch-btn touch-duck">
-          <span aria-hidden="true">↓</span> DUCK / FAST-FALL
-        </button>
-        <button id="btn-touch-jump" type="button" class="touch-btn touch-jump">
-          <span aria-hidden="true">↑</span> JUMP
-        </button>
-      </div>
 
       <div id="sr-announcer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </main>

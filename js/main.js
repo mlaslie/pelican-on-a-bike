@@ -133,6 +133,7 @@
 
     function updateOverlays(snapshot) {
       const st = snapshot.state;
+      document.body.classList.toggle('is-playing', st === 'playing');
       overlayStart.hidden = st !== 'idle';
       overlayPause.hidden = st !== 'paused';
       overlayRespawnUnlocked.hidden = st !== 'respawn-unlocked';
@@ -275,6 +276,39 @@
     global.PelicanGame.instance = engine;
     syncSoundButton();
     syncSpeedModeButtons(engine.speedMode);
+
+    // Capability-based mobile / touch detection (prefers pointer/hover media queries over brittle UA strings)
+    const coarseQuery = global.matchMedia ? global.matchMedia('(pointer: coarse) and (hover: none)') : null;
+    let isTouchDevice = false;
+    function applyTouchMode(nextTouch) {
+      isTouchDevice = Boolean(nextTouch);
+      document.documentElement.classList.toggle('is-touch-device', isTouchDevice);
+      engine.setTouchMode(isTouchDevice);
+    }
+    function detectMobileTouch() {
+      const uaMobile = Boolean(global.navigator && global.navigator.userAgentData && global.navigator.userAgentData.mobile);
+      return Boolean((coarseQuery && coarseQuery.matches) || uaMobile);
+    }
+    applyTouchMode(detectMobileTouch());
+    if (coarseQuery) {
+      if (typeof coarseQuery.addEventListener === 'function') {
+        coarseQuery.addEventListener('change', function () {
+          applyTouchMode(detectMobileTouch());
+        });
+      } else if (typeof coarseQuery.addListener === 'function') {
+        coarseQuery.addListener(function () {
+          applyTouchMode(detectMobileTouch());
+        });
+      }
+    }
+
+    // Unlock Web Audio synchronously on first touch/pointer gesture (iOS Safari requirement)
+    function unlockAudioOnce() {
+      if (AudioMod.unlock) AudioMod.unlock();
+    }
+    global.addEventListener('touchstart', unlockAudioOnce, { passive: true, once: true });
+    global.addEventListener('pointerdown', unlockAudioOnce, { passive: true, once: true });
+
     engine.startLoop();
 
     // Button listeners
@@ -362,16 +396,62 @@
       });
     }
 
-    // Canvas pointer controls (press-and-hold variable jump)
+    // Canvas pointer & multi-touch controls (split-screen thumb zones + swipe-down fast-fall)
+    const activeTouches = new Map();
+
+    function syncTouchActionsFromMap() {
+      let hasJump = false;
+      let hasDuck = false;
+      activeTouches.forEach(function (entry) {
+        if (entry.action === 'jump') hasJump = true;
+        if (entry.action === 'duck') hasDuck = true;
+      });
+      if (!hasJump) engine.jumpRelease();
+      engine.setDuck(hasDuck);
+    }
+
     canvas.addEventListener('pointerdown', function (e) {
-      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      if (e.pointerType === 'touch') {
+        if (!isTouchDevice) applyTouchMode(true);
+        const rect = canvas.getBoundingClientRect();
+        const relX = rect.width > 0 ? (e.clientX - rect.left) / rect.width : 0.7;
+        const action = engine.state === 'playing' && relX < 0.35 ? 'duck' : 'jump';
+        activeTouches.set(e.pointerId, { startY: e.clientY, action: action });
+        if (action === 'duck') {
+          engine.setDuck(true);
+        } else {
+          engine.jumpPress();
+        }
+        return;
+      }
+
+      if (e.button !== 0) return;
       canvas.focus();
       engine.jumpPress();
     });
 
-    global.addEventListener('pointerup', function () {
-      engine.jumpRelease();
+    canvas.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'touch') return;
+      const entry = activeTouches.get(e.pointerId);
+      if (!entry) return;
+      if (entry.action === 'jump' && engine.state === 'playing' && (e.clientY - entry.startY) > 26) {
+        entry.action = 'duck';
+        syncTouchActionsFromMap();
+      }
     });
+
+    function handlePointerEnd(e) {
+      if (e.pointerType === 'touch') {
+        if (activeTouches.delete(e.pointerId)) {
+          syncTouchActionsFromMap();
+        }
+        return;
+      }
+      engine.jumpRelease();
+    }
+
+    global.addEventListener('pointerup', handlePointerEnd);
+    global.addEventListener('pointercancel', handlePointerEnd);
 
     // Dedicated Touch Controls
     btnTouchJump.addEventListener('pointerdown', function (e) {

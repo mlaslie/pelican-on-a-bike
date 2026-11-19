@@ -46,7 +46,7 @@ Use the **Campus Jump Picker** below the stage to jump straight into any campus,
 - `B`: Ring bike bell
 - `P` / `Esc`: Pause / Resume
 - `M`: Mute / Unmute synthesized Web Audio SFX
-- Touch buttons (`DUCK` / `JUMP`) & tap-to-jump supported on touch devices
+- **Mobile & Touch:** Capability-detected touch ergonomics (`DUCK` / `JUMP` thumb buttons, split-canvas tap left to duck / right to jump, swipe ↓ to fast-fall, zoomed portrait camera, and compact phone landscape play mode)
 
 ## Run Locally
 Open `index.html` directly in a browser, or serve the folder over HTTP:

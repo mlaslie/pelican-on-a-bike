@@ -89,11 +89,17 @@
       this.rafId = null;
       this.lastTs = 0;
       this.dpr = 1;
+      this.viewWidth = STAGE_W;
+      this.viewOffsetX = 0;
 
       this.setupResizeObserver();
       this.resizeCanvas();
       this.emitHud(true);
       this.emitState();
+    }
+
+    setTouchMode(active) {
+      this.pelican.setTouchMode(active);
     }
 
     setupResizeObserver() {
@@ -108,13 +114,18 @@
 
     resizeCanvas() {
       const rect = this.canvas.getBoundingClientRect();
-      const cssW = Math.max(300, rect.width || STAGE_W);
-      const scale = cssW / STAGE_W;
+      const cssW = Math.max(280, rect.width || STAGE_W);
+      const cssH = rect.height || Math.round((cssW * STAGE_H) / STAGE_W);
+      const isPortraitZoom = (cssW / cssH) < 2.25;
+
+      this.viewWidth = isPortraitZoom ? 620 : STAGE_W;
+      this.viewOffsetX = isPortraitZoom ? 68 : 0;
+
       const dpr = clamp(global.devicePixelRatio || 1, 1, 2.5);
       this.dpr = dpr;
 
-      const targetW = Math.round(STAGE_W * dpr * Math.max(1, scale));
-      const targetH = Math.round(STAGE_H * dpr * Math.max(1, scale));
+      const targetW = Math.round(Math.max(this.viewWidth, cssW) * dpr);
+      const targetH = Math.round(Math.max(STAGE_H, cssH) * dpr);
       if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
         this.canvas.width = targetW;
         this.canvas.height = targetH;
@@ -729,12 +740,12 @@
 
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.translate(STAGE_W * 0.5, 22 + (1 - fadeIn) * -8);
+      ctx.translate(this.viewOffsetX + this.viewWidth * 0.5, 22 + (1 - fadeIn) * -8);
 
       ctx.font = '700 11px -apple-system, BlinkMacSystemFont, sans-serif';
       const labelText = t.kicker + '  •  ' + t.title;
       const textW = ctx.measureText(labelText).width;
-      const pillW = Math.min(STAGE_W - 40, textW + 40);
+      const pillW = Math.min(this.viewWidth - 28, textW + 40);
 
       ctx.fillStyle = 'rgba(32, 33, 36, 0.86)';
       ctx.beginPath();
@@ -755,11 +766,14 @@
 
     render() {
       const ctx = this.ctx;
-      const sx = this.canvas.width / STAGE_W;
+      const sx = this.canvas.width / this.viewWidth;
       const sy = this.canvas.height / STAGE_H;
 
       ctx.save();
       ctx.scale(sx, sy);
+      if (this.viewOffsetX !== 0) {
+        ctx.translate(-this.viewOffsetX, 0);
+      }
 
       const campusInfo = this.Campuses.renderBackdrop(ctx, {
         score: this.score,

@@ -40,6 +40,16 @@
     return setMuted(!muted);
   }
 
+  function unlock() {
+    if (muted || !AudioCtx) return;
+    if (!ctx) {
+      ctx = new AudioCtx();
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(function () {});
+    }
+  }
+
   function playJump() {
     const ac = ensureContext();
     if (!ac) return;
@@ -366,6 +376,7 @@
     isMuted: isMuted,
     setMuted: setMuted,
     toggleMute: toggleMute,
+    unlock: unlock,
     playJump: playJump,
     playDuck: playDuck,
     playMilestone: playMilestone,

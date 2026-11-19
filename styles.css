@@ -63,7 +63,7 @@ body {
 .app-shell {
   max-width: 1040px;
   margin: 0 auto;
-  padding: 20px 20px 28px;
+  padding: 20px max(20px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
 }
 
 /* Header */
@@ -461,6 +461,8 @@ button:disabled {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Overlays */
@@ -911,6 +913,8 @@ button:disabled {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .touch-duck {
@@ -923,7 +927,30 @@ button:disabled {
   color: #ffffff;
 }
 
-@media (pointer: coarse), (max-width: 720px) {
+#start-hint-touch {
+  display: none;
+}
+
+.mobile-rotate-tip {
+  display: none;
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--ink-secondary);
+}
+
+@media (pointer: coarse) and (hover: none) {
+  .btn-kbd,
+  .key-hint,
+  .site-footer,
+  #start-hint-desktop {
+    display: none;
+  }
+
+  #start-hint-touch {
+    display: block;
+  }
+
   .touch-controls {
     display: grid;
   }
@@ -931,6 +958,139 @@ button:disabled {
   button {
     min-block-size: 44px;
     min-inline-size: 44px;
+  }
+
+  .touch-btn {
+    min-block-size: 56px;
+  }
+}
+
+.is-touch-device .btn-kbd,
+.is-touch-device .key-hint,
+.is-touch-device .site-footer,
+.is-touch-device #start-hint-desktop {
+  display: none;
+}
+
+.is-touch-device #start-hint-touch {
+  display: block;
+}
+
+.is-touch-device .touch-controls {
+  display: grid;
+}
+
+@media (max-width: 720px) {
+  .touch-controls {
+    display: grid;
+  }
+
+  button {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .app-shell {
+    padding: 10px max(12px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+
+  .site-header {
+    margin-bottom: 10px;
+    gap: 8px;
+  }
+
+  #game-canvas {
+    aspect-ratio: 620 / 340;
+  }
+
+  .stage-hud {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .route-tracker {
+    padding: 10px 14px 18px;
+  }
+
+  .stop-pts {
+    display: none;
+  }
+
+  .stop-text,
+  .stop-flag {
+    font-size: 0.64rem;
+  }
+
+  .overlay-card {
+    max-height: 92%;
+    overflow-y: auto;
+    padding: 14px 16px;
+  }
+
+  .touch-controls {
+    margin-top: 10px;
+  }
+
+  .touch-btn {
+    min-block-size: 56px;
+  }
+
+  .mobile-rotate-tip {
+    display: block;
+    margin: 8px 0 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .app-shell {
+    padding: 6px max(14px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
+
+  .site-header {
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: 1.05rem;
+  }
+
+  .subtitle,
+  .picker-note {
+    display: none;
+  }
+
+  .stage-hud {
+    padding: 5px 12px;
+    gap: 6px;
+  }
+
+  body.is-playing .hud-sep,
+  body.is-playing .hud-campus-landmark {
+    display: none;
+  }
+
+  body.is-playing .stage-card {
+    width: min(100%, calc((100dvh - 165px) * 960 / 340));
+    margin: 0 auto;
+  }
+
+  body.is-playing .route-tracker,
+  body.is-playing .picker-section,
+  body.is-playing .site-footer,
+  body.is-playing .mobile-rotate-tip {
+    display: none;
+  }
+
+  body.is-playing .touch-controls {
+    width: min(100%, calc((100dvh - 165px) * 960 / 340));
+    margin: 6px auto 0;
+  }
+
+  body.is-playing .touch-btn {
+    min-block-size: 44px;
   }
 }
 
