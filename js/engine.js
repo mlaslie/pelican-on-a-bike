@@ -116,10 +116,10 @@
       const rect = this.canvas.getBoundingClientRect();
       const cssW = Math.max(280, rect.width || STAGE_W);
       const cssH = rect.height || Math.round((cssW * STAGE_H) / STAGE_W);
-      const isPortraitZoom = (cssW / cssH) < 2.25;
+      const isPortraitZoom = (cssW / cssH) < 2.15;
 
-      this.viewWidth = isPortraitZoom ? 620 : STAGE_W;
-      this.viewOffsetX = isPortraitZoom ? 68 : 0;
+      this.viewWidth = isPortraitZoom ? 500 : STAGE_W;
+      this.viewOffsetX = isPortraitZoom ? 76 : 0;
 
       const dpr = clamp(global.devicePixelRatio || 1, 1, 2.5);
       this.dpr = dpr;

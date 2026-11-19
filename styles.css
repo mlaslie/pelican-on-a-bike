@@ -770,6 +770,10 @@ button:disabled {
   background-color: var(--g-blue);
 }
 
+.stop-dot-finish {
+  background-color: var(--g-green);
+}
+
 .stop-text,
 .stop-flag {
   font-family: var(--font-mono);
@@ -993,25 +997,104 @@ button:disabled {
 
 @media (max-width: 600px) and (orientation: portrait) {
   .app-shell {
-    padding: 10px max(12px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    padding: 8px max(8px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
   }
 
   .site-header {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     gap: 8px;
   }
 
-  #game-canvas {
-    aspect-ratio: 620 / 340;
+  .brand-icon {
+    width: 24px;
+    height: 24px;
   }
 
-  .stage-hud {
-    padding: 8px 12px;
+  h1 {
+    font-size: 1.1rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .toolbar {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: space-between;
     gap: 6px;
   }
 
+  .mode-switch {
+    flex: 1 1 auto;
+    max-width: 190px;
+  }
+
+  .mode-switch-btn {
+    flex: 1;
+    min-inline-size: 0;
+    min-block-size: 36px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+  }
+
+  .tool-btn {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    min-block-size: 40px;
+    min-inline-size: 40px;
+    justify-content: center;
+    flex: none;
+  }
+
+  .tool-btn-label {
+    display: none;
+  }
+
+  .stage-card {
+    border-radius: 14px;
+  }
+
+  .stage-hud {
+    padding: 7px 10px;
+    gap: 5px;
+  }
+
+  .hud-campus {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 0.84rem;
+  }
+
+  .hud-sep,
+  .hud-campus-landmark,
+  .mode-badge {
+    display: none;
+  }
+
+  .hud-campus-name {
+    margin-right: auto;
+  }
+
+  .hud-right {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .score-readout {
+    font-size: 0.92rem;
+    gap: 6px;
+  }
+
+  #game-canvas {
+    aspect-ratio: 500 / 340;
+  }
+
   .route-tracker {
-    padding: 10px 14px 18px;
+    padding: 8px 12px 16px;
   }
 
   .stop-pts {
@@ -1023,23 +1106,88 @@ button:disabled {
     font-size: 0.64rem;
   }
 
+  .stage-overlay {
+    padding: 8px;
+  }
+
   .overlay-card {
-    max-height: 92%;
+    max-height: 96%;
     overflow-y: auto;
-    padding: 14px 16px;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  .overlay-kicker {
+    font-size: 0.64rem;
+    margin-bottom: 2px;
+  }
+
+  .overlay-title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .overlay-desc {
+    font-size: 0.77rem;
+    line-height: 1.32;
+    margin-bottom: 10px;
+  }
+
+  .overlay-hint {
+    font-size: 0.68rem;
+    margin-top: 6px;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    padding: 7px 16px;
+    font-size: 0.85rem;
+    min-block-size: 38px;
+  }
+
+  .stats-grid {
+    margin: 8px 0 10px;
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .stat-item dd {
+    font-size: 0.84rem;
+  }
+
+  .respawn-top-bar {
+    margin: 0 -14px 10px;
+  }
+
+  .respawn-g-crest svg {
+    width: 38px;
+    height: 38px;
+  }
+
+  .respawn-count-pill {
+    margin: 2px 0 8px;
+    font-size: 0.72rem;
   }
 
   .touch-controls {
     margin-top: 10px;
+    gap: 10px;
   }
 
   .touch-btn {
-    min-block-size: 56px;
+    min-block-size: 62px;
+    font-size: 0.94rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 6px rgb(32 33 36 / 0.08);
   }
 
   .mobile-rotate-tip {
     display: block;
     margin: 8px 0 0;
+  }
+
+  .picker-section {
+    margin-top: 14px;
   }
 }
 
