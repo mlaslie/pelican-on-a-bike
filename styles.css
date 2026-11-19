@@ -1264,6 +1264,197 @@ button:disabled {
   }
 }
 
+/* Mobile Full Screen Arcade Mode */
+.fullscreen-trigger-btn {
+  display: none;
+}
+
+@media (pointer: coarse) and (hover: none), (max-width: 780px) {
+  .fullscreen-trigger-btn {
+    display: inline-flex;
+  }
+}
+
+.is-touch-device .fullscreen-trigger-btn {
+  display: inline-flex;
+}
+
+.fs-hud-actions {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.fs-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-block-size: 34px;
+  min-inline-size: 34px;
+  padding: 0;
+  border-radius: 999px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+}
+
+html.is-mobile-fullscreen,
+body.is-mobile-fullscreen {
+  overflow: hidden;
+  height: 100dvh;
+  overscroll-behavior: none;
+  background-color: #2c2f33;
+}
+
+body.is-mobile-fullscreen .google-top-bar,
+body.is-mobile-fullscreen .site-header,
+body.is-mobile-fullscreen .route-tracker,
+body.is-mobile-fullscreen .picker-section,
+body.is-mobile-fullscreen .mobile-rotate-tip,
+body.is-mobile-fullscreen .site-footer {
+  display: none !important;
+}
+
+body.is-mobile-fullscreen .app-shell {
+  max-width: none;
+  padding: 0;
+  height: 100dvh;
+}
+
+body.is-mobile-fullscreen .stage-card {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  margin: 0;
+}
+
+body.is-mobile-fullscreen .stage-hud {
+  flex: none;
+  padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left));
+  background-color: rgb(255 255 255 / 0.94);
+  backdrop-filter: blur(8px);
+  gap: 6px 10px;
+}
+
+body.is-mobile-fullscreen .hud-sep,
+body.is-mobile-fullscreen .hud-campus-landmark,
+body.is-mobile-fullscreen .mode-badge {
+  display: none;
+}
+
+body.is-mobile-fullscreen .fs-hud-actions {
+  display: inline-flex;
+}
+
+body.is-mobile-fullscreen .canvas-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  background-color: #2c2f33;
+}
+
+body.is-mobile-fullscreen #game-canvas {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+body.is-mobile-fullscreen .stage-overlay {
+  padding: 12px 12px calc(98px + env(safe-area-inset-bottom));
+}
+
+body.is-mobile-fullscreen .touch-controls {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  margin: 0;
+  width: auto;
+  z-index: 1020;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  pointer-events: none;
+}
+
+body.is-mobile-fullscreen .touch-btn {
+  pointer-events: auto;
+  width: clamp(132px, 40vw, 176px);
+  min-block-size: 72px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  backdrop-filter: blur(8px);
+}
+
+body.is-mobile-fullscreen .touch-duck {
+  background-color: rgb(255 255 255 / 0.9);
+  border: 1.5px solid rgb(255 255 255 / 0.95);
+  color: var(--ink-primary);
+}
+
+body.is-mobile-fullscreen .touch-duck-sub {
+  display: none;
+}
+
+body.is-mobile-fullscreen .touch-jump {
+  background-color: rgb(26 115 232 / 0.92);
+  border: 1.5px solid rgb(138 180 248 / 0.75);
+  color: #ffffff;
+}
+
+@media (orientation: landscape) {
+  body.is-mobile-fullscreen .stage-hud {
+    flex-wrap: nowrap;
+    padding: max(6px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 6px max(14px, env(safe-area-inset-left));
+  }
+
+  body.is-mobile-fullscreen .hud-campus {
+    width: auto;
+    flex-wrap: nowrap;
+  }
+
+  body.is-mobile-fullscreen .hud-right {
+    width: auto;
+    flex-wrap: nowrap;
+  }
+
+  body.is-mobile-fullscreen .stage-overlay {
+    padding: 8px 12px calc(76px + env(safe-area-inset-bottom));
+  }
+
+  body.is-mobile-fullscreen .touch-controls {
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  body.is-mobile-fullscreen .touch-btn {
+    width: 142px;
+    min-block-size: 58px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+  }
+
+  body.is-mobile-fullscreen .touch-duck {
+    background-color: rgb(255 255 255 / 0.78);
+  }
+
+  body.is-mobile-fullscreen .touch-jump {
+    background-color: rgb(26 115 232 / 0.82);
+  }
+}
+
 /* Footer */
 .site-footer {
   margin-top: 16px;

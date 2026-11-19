@@ -80,6 +80,13 @@
           </svg>
           <span class="tool-btn-label">Sound</span>
         </button>
+
+        <button id="btn-fullscreen" type="button" class="tool-btn fullscreen-trigger-btn" aria-label="Full screen" aria-pressed="false" title="Full screen mode">
+          <svg class="btn-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="tool-btn-label">Full</span>
+        </button>
       </div>
     </header>
 
@@ -116,6 +123,23 @@
               <span class="hi-label">HI</span>
               <span id="hud-hi-score" class="score-digits">00000</span>
               <span id="hud-score" class="score-digits current-score">00000</span>
+            </div>
+
+            <div class="fs-hud-actions">
+              <button id="btn-fs-pause" type="button" class="fs-icon-btn" aria-label="Pause" disabled>
+                <svg id="fs-icon-pause" class="btn-svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                  <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+                </svg>
+                <svg id="fs-icon-play" class="btn-svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" hidden>
+                  <polygon points="7,5 19,12 7,19" fill="currentColor"/>
+                </svg>
+              </button>
+              <button id="btn-exit-fullscreen" type="button" class="fs-icon-btn" aria-label="Exit full screen" title="Exit full screen">
+                <svg class="btn-svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -324,7 +348,7 @@
 
       <div class="touch-controls" aria-label="Touch controls">
         <button id="btn-touch-duck" type="button" class="touch-btn touch-duck">
-          <span aria-hidden="true">↓</span> DUCK / FAST-FALL
+          <span aria-hidden="true">↓</span> DUCK<span class="touch-duck-sub"> / FAST-FALL</span>
         </button>
         <button id="btn-touch-jump" type="button" class="touch-btn touch-jump">
           <span aria-hidden="true">↑</span> JUMP

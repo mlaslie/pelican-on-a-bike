@@ -36,6 +36,11 @@
     const btnSound = document.getElementById('btn-sound');
     const iconSoundOn = document.getElementById('icon-sound-on');
     const iconSoundOff = document.getElementById('icon-sound-off');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    const btnExitFullscreen = document.getElementById('btn-exit-fullscreen');
+    const btnFsPause = document.getElementById('btn-fs-pause');
+    const fsIconPause = document.getElementById('fs-icon-pause');
+    const fsIconPlay = document.getElementById('fs-icon-play');
 
     // Overlays & overlay buttons
     const overlayStart = document.getElementById('overlay-start');
@@ -145,8 +150,15 @@
       btnPause.disabled = !canPause;
       const isPaused = st === 'paused';
       btnPauseLabel.textContent = isPaused ? 'Resume' : 'Pause';
+      btnPause.setAttribute('aria-label', isPaused ? 'Resume' : 'Pause');
       iconPause.hidden = isPaused;
       iconPlay.hidden = !isPaused;
+      if (btnFsPause) {
+        btnFsPause.disabled = !canPause;
+        btnFsPause.setAttribute('aria-label', isPaused ? 'Resume' : 'Pause');
+        fsIconPause.hidden = isPaused;
+        fsIconPlay.hidden = !isPaused;
+      }
 
       if (st === 'victory') {
         victoryScoreEl.textContent = padScore(snapshot.score);
@@ -308,6 +320,61 @@
     }
     global.addEventListener('touchstart', unlockAudioOnce, { passive: true, once: true });
     global.addEventListener('pointerdown', unlockAudioOnce, { passive: true, once: true });
+
+    // Mobile Full Screen Arcade Mode (uses native Fullscreen API when supported + 100dvh viewport fallback for iOS Safari)
+    let isMobileFullscreen = false;
+    function setMobileFullscreen(active, skipNative) {
+      isMobileFullscreen = Boolean(active);
+      document.documentElement.classList.toggle('is-mobile-fullscreen', isMobileFullscreen);
+      document.body.classList.toggle('is-mobile-fullscreen', isMobileFullscreen);
+      if (btnFullscreen) {
+        btnFullscreen.setAttribute('aria-pressed', isMobileFullscreen ? 'true' : 'false');
+      }
+      if (!skipNative) {
+        try {
+          if (isMobileFullscreen) {
+            const docEl = document.documentElement;
+            if (!document.fullscreenElement && docEl.requestFullscreen) {
+              const p = docEl.requestFullscreen();
+              if (p && typeof p.catch === 'function') p.catch(function () {});
+            } else if (!document.webkitFullscreenElement && docEl.webkitRequestFullscreen) {
+              docEl.webkitRequestFullscreen();
+            }
+          } else {
+            if (document.fullscreenElement && document.exitFullscreen) {
+              const p = document.exitFullscreen();
+              if (p && typeof p.catch === 'function') p.catch(function () {});
+            } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            }
+          }
+        } catch (_) {}
+      }
+      global.requestAnimationFrame(function () {
+        engine.resizeCanvas();
+      });
+    }
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', function () {
+        setMobileFullscreen(!isMobileFullscreen);
+      });
+    }
+    if (btnExitFullscreen) {
+      btnExitFullscreen.addEventListener('click', function () {
+        setMobileFullscreen(false);
+      });
+    }
+    if (btnFsPause) {
+      btnFsPause.addEventListener('click', function () {
+        engine.togglePause();
+      });
+    }
+    document.addEventListener('fullscreenchange', function () {
+      if (!document.fullscreenElement && isMobileFullscreen) {
+        setMobileFullscreen(false, true);
+      }
+    });
 
     engine.startLoop();
 

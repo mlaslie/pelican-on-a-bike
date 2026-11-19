@@ -90,7 +90,9 @@
       this.lastTs = 0;
       this.dpr = 1;
       this.viewWidth = STAGE_W;
+      this.viewHeight = STAGE_H;
       this.viewOffsetX = 0;
+      this.stageTop = 0;
 
       this.setupResizeObserver();
       this.resizeCanvas();
@@ -115,17 +117,34 @@
     resizeCanvas() {
       const rect = this.canvas.getBoundingClientRect();
       const cssW = Math.max(280, rect.width || STAGE_W);
-      const cssH = rect.height || Math.round((cssW * STAGE_H) / STAGE_W);
-      const isPortraitZoom = (cssW / cssH) < 2.15;
+      const cssH = Math.max(120, rect.height || Math.round((cssW * STAGE_H) / STAGE_W));
+      const aspect = cssW / cssH;
 
-      this.viewWidth = isPortraitZoom ? 500 : STAGE_W;
-      this.viewOffsetX = isPortraitZoom ? 76 : 0;
+      if (aspect < 1.44) {
+        // Tall portrait fullscreen: keep 500-wide game world un-stretched with sky above & deck below
+        this.viewWidth = 500;
+        this.viewOffsetX = 76;
+        this.viewHeight = Math.max(STAGE_H, Math.round(this.viewWidth / aspect));
+        this.stageTop = Math.round((this.viewHeight - STAGE_H) * 0.44);
+      } else if (aspect < 2.15) {
+        // Portrait zoomed card or compact landscape fullscreen
+        this.viewWidth = clamp(Math.round(STAGE_H * aspect), 500, STAGE_W);
+        this.viewOffsetX = this.viewWidth < 760 ? clamp(Math.round((760 - this.viewWidth) * 0.29), 0, 76) : 0;
+        this.viewHeight = STAGE_H;
+        this.stageTop = 0;
+      } else {
+        // Wide desktop / phone landscape
+        this.viewWidth = STAGE_W;
+        this.viewOffsetX = 0;
+        this.viewHeight = STAGE_H;
+        this.stageTop = 0;
+      }
 
       const dpr = clamp(global.devicePixelRatio || 1, 1, 2.5);
       this.dpr = dpr;
 
       const targetW = Math.round(Math.max(this.viewWidth, cssW) * dpr);
-      const targetH = Math.round(Math.max(STAGE_H, cssH) * dpr);
+      const targetH = Math.round(Math.max(this.viewHeight, cssH) * dpr);
       if (this.canvas.width !== targetW || this.canvas.height !== targetH) {
         this.canvas.width = targetW;
         this.canvas.height = targetH;
@@ -767,12 +786,29 @@
     render() {
       const ctx = this.ctx;
       const sx = this.canvas.width / this.viewWidth;
-      const sy = this.canvas.height / STAGE_H;
+      const sy = this.canvas.height / this.viewHeight;
 
       ctx.save();
       ctx.scale(sx, sy);
-      if (this.viewOffsetX !== 0) {
-        ctx.translate(-this.viewOffsetX, 0);
+
+      if (this.viewHeight > STAGE_H) {
+        const stateInfo = this.Campuses.getCampusState(this.score, this.endlessMode);
+        const pal = stateInfo.current.palette;
+        if (this.stageTop > 0) {
+          ctx.fillStyle = pal.skyTop;
+          ctx.fillRect(0, 0, this.viewWidth, this.stageTop + 4);
+        }
+        const deckTop = this.stageTop + STAGE_H - 4;
+        const deckGrad = ctx.createLinearGradient(0, deckTop, 0, this.viewHeight);
+        deckGrad.addColorStop(0, pal.roadFill);
+        deckGrad.addColorStop(0.35, '#4c4f54');
+        deckGrad.addColorStop(1, '#2c2f33');
+        ctx.fillStyle = deckGrad;
+        ctx.fillRect(0, deckTop, this.viewWidth, this.viewHeight - deckTop + 2);
+      }
+
+      if (this.viewOffsetX !== 0 || this.stageTop !== 0) {
+        ctx.translate(-this.viewOffsetX, this.stageTop);
       }
 
       const campusInfo = this.Campuses.renderBackdrop(ctx, {
