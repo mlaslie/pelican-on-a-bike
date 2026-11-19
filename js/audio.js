@@ -348,6 +348,49 @@
     noise.start(now);
   }
 
+  function playBirdSquawk() {
+    const ac = ensureContext();
+    if (!ac) return;
+    const now = ac.currentTime;
+
+    // Nasal bandpass filter for authentic cartoon bird squawk timbre
+    const filter = ac.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1650, now);
+    filter.frequency.exponentialRampToValueAtTime(920, now + 0.22);
+    filter.Q.setValueAtTime(3.2, now);
+
+    // Main squawk voice with pitch spike & distressed drop
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1180, now);
+    osc.frequency.exponentialRampToValueAtTime(1680, now + 0.045);
+    osc.frequency.exponentialRampToValueAtTime(640, now + 0.23);
+
+    // Fast vibrato LFO for ruffled bird warble
+    const lfo = ac.createOscillator();
+    const lfoGain = ac.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.setValueAtTime(30, now);
+    lfoGain.gain.setValueAtTime(95, now);
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.14, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ac.destination);
+
+    osc.start(now);
+    lfo.start(now);
+    osc.stop(now + 0.25);
+    lfo.stop(now + 0.25);
+  }
+
   function playRevive() {
     const ac = ensureContext();
     if (!ac) return;
@@ -502,6 +545,7 @@
     playGeminiPowerup: playGeminiPowerup,
     playCollectG: playCollectG,
     playObstacleSmash: playObstacleSmash,
+    playBirdSquawk: playBirdSquawk,
     playRevive: playRevive,
     playAtariEndingMusic: playAtariEndingMusic,
     stopEndingMusic: stopEndingMusic

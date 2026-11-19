@@ -810,6 +810,13 @@
       if (hitObs) {
         if (this.invincibleTimer > 0) {
           this.obstacles.smashObstacle(hitObs);
+          const isBird = hitObs.kind === 'seagull' || hitObs.kind === 'harbour-gull' ||
+            hitObs.kind === 'pigeon' || hitObs.kind === 'nyc-pigeon' ||
+            hitObs.kind === 'alpine-swift' || hitObs.kind === 'pixel-ptero';
+          if (isBird && this.Audio.playBirdSquawk) {
+            this.Audio.playBirdSquawk();
+            this.spawnFeathers(hitObs.x + hitObs.w * 0.5, hitObs.y + hitObs.h * 0.5, 6);
+          }
           this.Audio.playObstacleSmash();
           this.spawnSparkles(hitObs.x + hitObs.w * 0.5, hitObs.y + hitObs.h * 0.5, 14, ['#4285F4', '#8a63f6', '#24c1e0', '#ffffff']);
         } else if (this.reviveShieldTimer > 0) {
