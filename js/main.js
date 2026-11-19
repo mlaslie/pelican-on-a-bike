@@ -165,6 +165,17 @@
         }
       }
 
+      const maxReached = snapshot.maxReachedLevel || 1;
+      for (let i = 0; i < campusPills.length; i++) {
+        const pill = campusPills[i];
+        const lvl = parseInt(pill.dataset.level || '0', 10);
+        if (lvl > 0) {
+          const locked = lvl > maxReached;
+          pill.disabled = locked;
+          pill.classList.toggle('is-locked', locked);
+        }
+      }
+
       const canPause = st === 'playing' || st === 'paused';
       btnPause.disabled = !canPause;
       const isPaused = st === 'paused';

@@ -367,12 +367,12 @@
 
       <section class="picker-section" aria-labelledby="picker-heading">
         <div class="picker-header">
-          <h2 id="picker-heading">Campus Jump Picker — Ranked by Difficulty</h2>
-          <p class="picker-note">Jump straight to any campus (Lvl 1 Sydney Easy → Lvl 6 Mountain View Hardest).</p>
+          <h2 id="picker-heading">World Tour Campuses — Ranked by Difficulty</h2>
+          <p class="picker-note">Unlock each campus by riding through the tour (Lvl 1 Sydney Easy → Lvl 6 Mountain View Hardest).</p>
         </div>
 
-        <div class="campus-picker" role="group" aria-label="Campus Jump Picker">
-          <button type="button" class="campus-pill" data-campus="sydney" aria-current="true">
+        <div class="campus-picker" role="group" aria-label="World Tour Campuses">
+          <button type="button" class="campus-pill" data-campus="sydney" data-level="1" aria-current="true">
             <span class="pill-swatch pill-cyan" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">Sydney <span class="pill-rank">LVL 1 · EASY</span></span>
@@ -381,7 +381,7 @@
             <span class="pill-range">0 pts</span>
           </button>
 
-          <button type="button" class="campus-pill" data-campus="zurich">
+          <button type="button" class="campus-pill is-locked" data-campus="zurich" data-level="2" disabled>
             <span class="pill-swatch pill-green" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">Zurich <span class="pill-rank">LVL 2</span></span>
@@ -390,7 +390,7 @@
             <span class="pill-range">350 pts</span>
           </button>
 
-          <button type="button" class="campus-pill" data-campus="london">
+          <button type="button" class="campus-pill is-locked" data-campus="london" data-level="3" disabled>
             <span class="pill-swatch pill-red" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">London <span class="pill-rank">LVL 3</span></span>
@@ -399,7 +399,7 @@
             <span class="pill-range">700 pts</span>
           </button>
 
-          <button type="button" class="campus-pill" data-campus="new-york">
+          <button type="button" class="campus-pill is-locked" data-campus="new-york" data-level="4" disabled>
             <span class="pill-swatch pill-orange" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">New York <span class="pill-rank">LVL 4</span></span>
@@ -408,7 +408,7 @@
             <span class="pill-range">1050 pts</span>
           </button>
 
-          <button type="button" class="campus-pill" data-campus="tokyo">
+          <button type="button" class="campus-pill is-locked" data-campus="tokyo" data-level="5" disabled>
             <span class="pill-swatch pill-purple" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">Tokyo <span class="pill-rank">LVL 5</span></span>
@@ -417,7 +417,7 @@
             <span class="pill-range">1400 pts</span>
           </button>
 
-          <button type="button" class="campus-pill" data-campus="mountain-view">
+          <button type="button" class="campus-pill is-locked" data-campus="mountain-view" data-level="6" disabled>
             <span class="pill-swatch pill-blue" aria-hidden="true"></span>
             <span class="pill-meta">
               <span class="pill-city">Mountain View <span class="pill-rank pill-rank-hardest">LVL 6 · HARDEST</span></span>

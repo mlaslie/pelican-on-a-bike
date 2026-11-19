@@ -46,6 +46,7 @@
       this.eoeElapsed = 0;
       this.endlessMode = false;
       this.secretTour = true;
+      this.maxReachedLevel = 1;
       this.secretUnlockCount = 0;
       this.isPreview = false;
       this.startCampusId = 'sydney';
@@ -711,6 +712,10 @@
 
       if (activeCampus.id !== this.lastCampusId) {
         this.lastCampusId = activeCampus.id;
+        const diffLvl = activeCampus.difficulty || 1;
+        if (diffLvl > this.maxReachedLevel) {
+          this.maxReachedLevel = diffLvl;
+        }
         if (activeCampus.id === 'cloud-tpu') {
           this.unlockSecretUpTo(1, false);
         } else if (activeCampus.id === 'moonshot-moon') {
@@ -721,6 +726,7 @@
         this.showCampusToast(activeCampus);
         this.pelican.ringBell();
         this.Audio.playBikeBell();
+        this.emitState();
         if (this.callbacks.onCampusChange) {
           this.callbacks.onCampusChange(activeCampus);
         }
@@ -1001,6 +1007,7 @@
         campus: campusState.current,
         endlessMode: this.endlessMode,
         secretTour: this.secretTour,
+        maxReachedLevel: this.maxReachedLevel,
         secretUnlockCount: this.secretUnlockCount,
         isPreview: this.isPreview,
         speedMode: this.speedMode,
