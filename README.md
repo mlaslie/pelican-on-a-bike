@@ -4,6 +4,8 @@
 
 A zero-build, Chrome Dino–inspired endless and World Tour runner featuring an animated vector pelican riding a 4-color Google GBike through realistic multi-layer parallax scenes of global Google campuses.
 
+> Built in **Google Antigravity** using **Gemini 4 Neon**.
+
 ## Screenshots
 
 ### Mountain View — Bay View & Googleplex
