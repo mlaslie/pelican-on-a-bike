@@ -74,6 +74,35 @@
       aerial: [
         { kind: 'nyc-pigeon', w: 46, h: 26 }
       ]
+    },
+    'cloud-tpu': {
+      ground: [
+        { kind: 'tpu-rack', w: 38, h: 54 },
+        { kind: 'cooling-valve', w: 48, h: 38 },
+        { kind: 'fiber-node', w: 36, h: 48 }
+      ],
+      aerial: [
+        { kind: 'data-packet', w: 48, h: 24 }
+      ]
+    },
+    'moonshot-moon': {
+      ground: [
+        { kind: 'lunar-rover', w: 54, h: 42 },
+        { kind: 'moon-dish', w: 40, h: 50 },
+        { kind: 'moon-rock', w: 44, h: 36 }
+      ],
+      aerial: [
+        { kind: 'orbital-sat', w: 54, h: 26 }
+      ]
+    },
+    'dino-desert': {
+      ground: [
+        { kind: 'pixel-cactus-sm', w: 30, h: 48 },
+        { kind: 'pixel-cactus-lg', w: 48, h: 52 }
+      ],
+      aerial: [
+        { kind: 'pixel-ptero', w: 50, h: 28 }
+      ]
     }
   };
 
@@ -728,7 +757,249 @@
     ctx.restore();
   }
 
-  function drawObstacleBody(ctx, obs, timeSec) {
+  // --- Secret Level 7: The Cloud / TPU Data Center ---
+  function drawTpuRack(ctx, x, y, w, h, timeSec) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#141e33';
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.roundRect(3, 2, w - 6, h - 2, 4);
+    ctx.fill();
+    ctx.stroke();
+    for (let r = 0; r < 4; r++) {
+      const ry = 8 + r * 11;
+      ctx.fillStyle = '#223659';
+      ctx.fillRect(7, ry, w - 14, 7);
+      const blink = Math.sin(timeSec * 7 + r * 1.4) > 0;
+      ctx.fillStyle = blink ? '#00e5ff' : '#34a853';
+      ctx.fillRect(9, ry + 2, 4, 3);
+      ctx.fillStyle = r % 2 === 0 ? '#4285F4' : '#b388ff';
+      ctx.fillRect(16, ry + 2.5, w - 25, 2);
+    }
+    ctx.restore();
+  }
+
+  function drawCoolingValve(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#4285F4';
+    ctx.fillRect(4, h - 20, w - 8, 12);
+    ctx.fillStyle = '#EA4335';
+    ctx.fillRect(10, h - 32, 8, 14);
+    ctx.fillStyle = '#34A853';
+    ctx.fillRect(w - 18, h - 32, 8, 14);
+    ctx.strokeStyle = '#FBBC04';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.arc(w * 0.5, h - 28, 9, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#26344d';
+    ctx.fillRect(2, h - 8, w - 4, 8);
+    ctx.restore();
+  }
+
+  function drawFiberNode(ctx, x, y, w, h, timeSec) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#1b2942';
+    ctx.strokeStyle = '#7ef9ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(8, 12, w - 16, h - 12, 4);
+    ctx.fill();
+    ctx.stroke();
+    const glow = 0.65 + 0.35 * Math.sin(timeSec * 6);
+    ctx.fillStyle = 'rgba(0, 229, 255, ' + glow.toFixed(2) + ')';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 9, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 9, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawDataPacket(ctx, x, y, w, h, timeSec) {
+    ctx.save();
+    ctx.translate(x + w * 0.5, y + h * 0.5);
+    const pulse = 0.8 + 0.2 * Math.sin(timeSec * 8);
+    // Neon speed tail
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.35)';
+    ctx.beginPath();
+    ctx.moveTo(10, -5);
+    ctx.lineTo(w * 0.55, 0);
+    ctx.lineTo(10, 5);
+    ctx.closePath();
+    ctx.fill();
+    // Glowing diamond packet
+    ctx.fillStyle = '#b388ff';
+    ctx.strokeStyle = '#7ef9ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-18, 0);
+    ctx.lineTo(0, -10 * pulse);
+    ctx.lineTo(16, 0);
+    ctx.lineTo(0, 10 * pulse);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-2, 0, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- Secret Level 8: Google X -> The Moon ---
+  function drawLunarRover(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    // Gold-foil chassis
+    ctx.fillStyle = '#fbbc04';
+    ctx.strokeStyle = '#b06000';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(8, h - 28, w - 16, 16, 4);
+    ctx.fill();
+    ctx.stroke();
+    // Camera mast & dish
+    ctx.fillStyle = '#e8eaed';
+    ctx.fillRect(14, h - 40, 3, 14);
+    ctx.fillStyle = '#4285F4';
+    ctx.fillRect(10, h - 42, 10, 6);
+    // Mesh lunar wheels
+    const wheels = [14, w * 0.5, w - 14];
+    for (let i = 0; i < wheels.length; i++) {
+      ctx.fillStyle = '#3c4043';
+      ctx.strokeStyle = '#d9dee3';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(wheels[i], h - 8, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawMoonDish(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#9aa0a6';
+    ctx.fillRect(w * 0.5 - 3, 20, 6, h - 20);
+    ctx.fillRect(w * 0.5 - 10, h - 6, 20, 6);
+    ctx.fillStyle = '#e8eaed';
+    ctx.strokeStyle = '#5f6368';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.arc(w * 0.5, 18, 15, 0.9 * Math.PI, 1.95 * Math.PI);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#b388ff';
+    ctx.beginPath();
+    ctx.arc(w * 0.5 - 6, 8, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawMoonRock(ctx, x, y, w, h) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#8b92a1';
+    ctx.strokeStyle = '#555c6d';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(4, h);
+    ctx.lineTo(10, 12);
+    ctx.lineTo(w * 0.45, 4);
+    ctx.lineTo(w - 8, 14);
+    ctx.lineTo(w - 3, h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#636a7a';
+    ctx.beginPath();
+    ctx.ellipse(w * 0.38, 18, 5, 3.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.65, 25, 4, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawOrbitalSat(ctx, x, y, w, h, timeSec) {
+    ctx.save();
+    ctx.translate(x + w * 0.5, y + h * 0.5);
+    // Blue solar wings
+    ctx.fillStyle = '#1a73e8';
+    ctx.strokeStyle = '#8ab4f8';
+    ctx.lineWidth = 1.2;
+    ctx.fillRect(-w * 0.46, -5, 16, 10);
+    ctx.strokeRect(-w * 0.46, -5, 16, 10);
+    ctx.fillRect(w * 0.46 - 16, -5, 16, 10);
+    ctx.strokeRect(w * 0.46 - 16, -5, 16, 10);
+    // Gold satellite core
+    ctx.fillStyle = '#fbbc04';
+    ctx.strokeStyle = '#b06000';
+    ctx.fillRect(-8, -8, 16, 16);
+    ctx.strokeRect(-8, -8, 16, 16);
+    // Blinking beacon
+    ctx.fillStyle = Math.sin(timeSec * 8) > 0 ? '#ff5252' : '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, -11, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- Secret Level 9: Chrome Dino Desert ---
+  function drawPixelCactus(ctx, x, y, w, h, isLarge, dinoNight) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = dinoNight ? '#d8dadf' : '#535353';
+    if (!isLarge) {
+      // Classic single Chrome Dino pixel cactus
+      ctx.fillRect(w * 0.5 - 4, 2, 8, h - 2);
+      ctx.fillRect(3, 14, 7, 5);
+      ctx.fillRect(3, 10, 4, 9);
+      ctx.fillRect(w - 10, 18, 7, 5);
+      ctx.fillRect(w - 7, 12, 4, 11);
+    } else {
+      // Classic twin pixel cactus cluster
+      ctx.fillRect(10, 2, 8, h - 2);
+      ctx.fillRect(3, 16, 7, 5);
+      ctx.fillRect(3, 11, 4, 10);
+      ctx.fillRect(18, 20, 6, 5);
+      ctx.fillRect(30, 10, 8, h - 10);
+      ctx.fillRect(38, 22, 7, 5);
+      ctx.fillRect(41, 16, 4, 11);
+    }
+    ctx.restore();
+  }
+
+  function drawPixelPtero(ctx, x, y, w, h, timeSec, dinoNight) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = dinoNight ? '#d8dadf' : '#535353';
+    const wingUp = Math.floor(timeSec * 8) % 2 === 0;
+    // Head & beak pointing left
+    ctx.fillRect(2, 10, 12, 5);
+    ctx.fillRect(10, 7, 10, 8);
+    // Body & tail
+    ctx.fillRect(18, 11, 20, 7);
+    ctx.fillRect(38, 13, 8, 4);
+    // Classic flapping pixel wing
+    if (wingUp) {
+      ctx.fillRect(20, 1, 12, 10);
+      ctx.fillRect(24, -2, 6, 4);
+    } else {
+      ctx.fillRect(20, 18, 12, 9);
+      ctx.fillRect(24, 25, 6, 4);
+    }
+    ctx.restore();
+  }
+
+  function drawObstacleBody(ctx, obs, timeSec, dinoNight) {
     switch (obs.kind) {
       case 'gbike-parked': drawParkedGBike(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'android-statue': drawAndroidStatue(ctx, obs.x, obs.y, obs.w, obs.h); break;
@@ -758,11 +1029,22 @@
       case 'nyc-hydrant': drawNYCHydrant(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'coffee-cart': drawCoffeeCart(ctx, obs.x, obs.y, obs.w, obs.h); break;
       case 'subway-barrier': drawSubwayBarrier(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'tpu-rack': drawTpuRack(ctx, obs.x, obs.y, obs.w, obs.h, timeSec); break;
+      case 'cooling-valve': drawCoolingValve(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'fiber-node': drawFiberNode(ctx, obs.x, obs.y, obs.w, obs.h, timeSec); break;
+      case 'data-packet': drawDataPacket(ctx, obs.x, obs.y, obs.w, obs.h, timeSec); break;
+      case 'lunar-rover': drawLunarRover(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'moon-dish': drawMoonDish(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'moon-rock': drawMoonRock(ctx, obs.x, obs.y, obs.w, obs.h); break;
+      case 'orbital-sat': drawOrbitalSat(ctx, obs.x, obs.y, obs.w, obs.h, timeSec); break;
+      case 'pixel-cactus-sm': drawPixelCactus(ctx, obs.x, obs.y, obs.w, obs.h, false, dinoNight); break;
+      case 'pixel-cactus-lg': drawPixelCactus(ctx, obs.x, obs.y, obs.w, obs.h, true, dinoNight); break;
+      case 'pixel-ptero': drawPixelPtero(ctx, obs.x, obs.y, obs.w, obs.h, timeSec, dinoNight); break;
       default: drawAndroidStatue(ctx, obs.x, obs.y, obs.w, obs.h); break;
     }
   }
 
-  function drawObstacle(ctx, obs, timeSec) {
+  function drawObstacle(ctx, obs, timeSec, dinoNight) {
     if (obs.smashed) {
       const cx = obs.x + obs.w * 0.5;
       const cy = obs.y + obs.h * 0.5;
@@ -771,7 +1053,7 @@
       ctx.translate(cx, cy);
       ctx.rotate(obs.rot || 0);
       ctx.translate(-cx, -cy);
-      drawObstacleBody(ctx, obs, timeSec);
+      drawObstacleBody(ctx, obs, timeSec, dinoNight);
       ctx.restore();
       return;
     }
@@ -780,7 +1062,7 @@
     ctx.shadowColor = 'rgba(20, 24, 31, 0.30)';
     ctx.shadowBlur = 5;
     ctx.shadowOffsetY = 2;
-    drawObstacleBody(ctx, obs, timeSec);
+    drawObstacleBody(ctx, obs, timeSec, dinoNight);
     ctx.restore();
   }
 
@@ -799,14 +1081,15 @@
 
     isInGraceZone(score, runTime, endlessMode) {
       if (runTime < 1.2) return true;
-      if (!endlessMode && score > 2045) return true;
+      if (!endlessMode && score > 2045 && score < 2100) return true;
+      if (!endlessMode && score > 3095) return true;
 
-      const boundaries = [350, 700, 1050, 1400, 1750];
-      const wrapped = endlessMode ? score % 2100 : score;
+      const boundaries = [350, 700, 1050, 1400, 1750, 2100, 2450, 2800];
+      const wrapped = endlessMode ? score % 3150 : score;
       for (let i = 0; i < boundaries.length; i++) {
         if (Math.abs(wrapped - boundaries[i]) <= 18) return true;
       }
-      if (endlessMode && (wrapped < 18 || wrapped > 2082)) return true;
+      if (endlessMode && (wrapped < 18 || wrapped > 3132)) return true;
       return false;
     }
 
@@ -1025,9 +1308,9 @@
       });
     }
 
-    draw(ctx, timeSec) {
+    draw(ctx, timeSec, dinoNight) {
       for (let i = 0; i < this.items.length; i++) {
-        drawObstacle(ctx, this.items[i], timeSec);
+        drawObstacle(ctx, this.items[i], timeSec, dinoNight);
       }
     }
   }

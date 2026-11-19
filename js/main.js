@@ -47,15 +47,20 @@
     const overlayPause = document.getElementById('overlay-pause');
     const overlayRespawnUnlocked = document.getElementById('overlay-respawn-unlocked');
     const overlayVictory = document.getElementById('overlay-victory');
+    const overlayEndOfEarth = document.getElementById('overlay-end-of-earth');
     const overlayRevive = document.getElementById('overlay-revive');
     const overlayGameover = document.getElementById('overlay-gameover');
+    const secretPickerSection = document.getElementById('secret-picker-section');
 
     const btnStartTour = document.getElementById('btn-start-tour');
     const btnResumeTour = document.getElementById('btn-resume-tour');
     const btnPauseRestart = document.getElementById('btn-pause-restart');
     const btnRespawnContinue = document.getElementById('btn-respawn-continue');
+    const btnEnterSecrets = document.getElementById('btn-enter-secrets');
     const btnContinueEndless = document.getElementById('btn-continue-endless');
     const btnPlayAgainVictory = document.getElementById('btn-play-again-victory');
+    const btnEoeEndless = document.getElementById('btn-eoe-endless');
+    const btnEoeRestart = document.getElementById('btn-eoe-restart');
     const btnFreeContinue = document.getElementById('btn-free-continue');
     const btnReviveRestart = document.getElementById('btn-revive-restart');
     const btnRestart = document.getElementById('btn-restart');
@@ -143,8 +148,12 @@
       overlayPause.hidden = st !== 'paused';
       overlayRespawnUnlocked.hidden = st !== 'respawn-unlocked';
       overlayVictory.hidden = st !== 'victory';
+      if (overlayEndOfEarth) overlayEndOfEarth.hidden = st !== 'end-of-earth';
       overlayRevive.hidden = st !== 'revive';
       overlayGameover.hidden = st !== 'gameover';
+      if (secretPickerSection) {
+        secretPickerSection.hidden = !snapshot.secretsUnlocked;
+      }
 
       const canPause = st === 'playing' || st === 'paused';
       btnPause.disabled = !canPause;
@@ -393,8 +402,19 @@
       if (e.detail > 0) canvas.focus();
     });
 
-    btnBell.addEventListener('click', function (e) {
+    // Easter Egg: Ring the Bike Bell 5 times to unlock the 3 Secret Levels!
+    let bellEasterCount = 0;
+    function handleBellRing() {
       engine.ringBell();
+      bellEasterCount += 1;
+      if (bellEasterCount >= 5 && !engine.secretsUnlocked) {
+        engine.unlockSecrets(true);
+        announce('Secret levels unlocked! The Cloud, The Moon, and Chrome Dino Desert.');
+      }
+    }
+
+    btnBell.addEventListener('click', function (e) {
+      handleBellRing();
       if (e.detail > 0) canvas.focus();
     });
 
@@ -427,6 +447,13 @@
       canvas.focus();
     });
 
+    if (btnEnterSecrets) {
+      btnEnterSecrets.addEventListener('click', function () {
+        engine.enterSecretLevels();
+        canvas.focus();
+      });
+    }
+
     btnContinueEndless.addEventListener('click', function () {
       engine.continueEndless();
       canvas.focus();
@@ -436,6 +463,20 @@
       engine.startTour('sydney');
       canvas.focus();
     });
+
+    if (btnEoeEndless) {
+      btnEoeEndless.addEventListener('click', function () {
+        engine.continueEndless();
+        canvas.focus();
+      });
+    }
+
+    if (btnEoeRestart) {
+      btnEoeRestart.addEventListener('click', function () {
+        engine.startTour('sydney');
+        canvas.focus();
+      });
+    }
 
     btnFreeContinue.addEventListener('click', function () {
       engine.useFreeContinue();
@@ -555,7 +596,7 @@
 
       if (code === 'KeyB') {
         e.preventDefault();
-        engine.ringBell();
+        handleBellRing();
         return;
       }
 

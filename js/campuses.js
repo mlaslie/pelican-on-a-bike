@@ -6,6 +6,7 @@
   const GROUND_Y = 282;
   const CAMPUS_SPAN = 350;
   const TOUR_FINISH = 2100;
+  const SECRET_FINISH = 3150;
   const TRANSITION_PTS = 45;
   const PIXELS_PER_PT = 1 / 0.048;
 
@@ -227,6 +228,105 @@
         edgeAccent: '#65a862',
         starsAlpha: 0
       }
+    },
+    {
+      id: 'cloud-tpu',
+      code: 'CLD',
+      difficulty: 7,
+      difficultyLabel: 'LVL 7 · SECRET',
+      isSecret: true,
+      name: 'The Cloud · TPU Pod',
+      shortName: 'The Cloud',
+      city: 'Google Cloud',
+      landmark: 'TPU Data Center',
+      badgeColor: '#00E5FF',
+      startScore: 2100,
+      endScore: 2450,
+      palette: {
+        skyTop: '#070c1a',
+        skyMid: '#0e1933',
+        skyHorizon: '#16284a',
+        sunX: 780,
+        sunY: 72,
+        sunColor: '#7ef9ff',
+        sunGlow: '#4285f4',
+        cloudFill: '#1e355e',
+        farRidge: '#132447',
+        nearRidge: '#1c335e',
+        roadFill: '#1b2230',
+        curbFill: '#3b4a63',
+        laneFill: '#1558b0',
+        laneStripe: '#7ef9ff',
+        edgeAccent: '#00e5ff',
+        starsAlpha: 0.45,
+        noSun: true
+      }
+    },
+    {
+      id: 'moonshot-moon',
+      code: 'MOON',
+      difficulty: 8,
+      difficultyLabel: 'LVL 8 · SECRET',
+      isSecret: true,
+      name: 'Google X → The Moon',
+      shortName: 'The Moon',
+      city: 'Lunar Surface',
+      landmark: 'Moonshot Factory',
+      badgeColor: '#B388FF',
+      startScore: 2450,
+      endScore: 2800,
+      palette: {
+        skyTop: '#040611',
+        skyMid: '#090e24',
+        skyHorizon: '#141d38',
+        sunX: 760,
+        sunY: 96,
+        sunColor: '#4fc3f7',
+        sunGlow: '#1a73e8',
+        cloudFill: '#1f2b4d',
+        farRidge: '#464d5e',
+        nearRidge: '#616878',
+        roadFill: '#6e7480',
+        curbFill: '#b8bec9',
+        laneFill: '#555c69',
+        laneStripe: '#e2e6ee',
+        edgeAccent: '#9aa0a6',
+        starsAlpha: 0.95,
+        noSun: true
+      }
+    },
+    {
+      id: 'dino-desert',
+      code: 'DINO',
+      difficulty: 9,
+      difficultyLabel: 'LVL 9 · SECRET',
+      isSecret: true,
+      name: 'Chrome Dino Desert',
+      shortName: 'Dino Desert',
+      city: 'Offline Mode',
+      landmark: 'ERR_INTERNET_DISCONNECTED',
+      badgeColor: '#535353',
+      startScore: 2800,
+      endScore: 3150,
+      palette: {
+        skyTop: '#f7f7f7',
+        skyMid: '#f7f7f7',
+        skyHorizon: '#f7f7f7',
+        sunX: 790,
+        sunY: 66,
+        sunColor: '#dcdcdc',
+        sunGlow: '#ececec',
+        cloudFill: '#dcdcdc',
+        farRidge: '#d5d5d5',
+        nearRidge: '#bdbdbd',
+        roadFill: '#f7f7f7',
+        curbFill: '#535353',
+        laneFill: '#efefef',
+        laneStripe: '#535353',
+        edgeAccent: '#535353',
+        starsAlpha: 0,
+        noSun: true
+      }
     }
   ];
 
@@ -237,28 +337,37 @@
     return LIST[0];
   }
 
-  function getCampusState(score, endlessMode) {
-    const wrappedScore = endlessMode ? modPositive(score, TOUR_FINISH) : clamp(score, 0, TOUR_FINISH - 0.001);
-    const idx = Math.min(LIST.length - 1, Math.floor(wrappedScore / CAMPUS_SPAN));
+  function isDinoNight(score) {
+    if (score < 2800) return false;
+    return Math.floor((score - 2800) / 100) % 2 === 1;
+  }
+
+  function getCampusState(score, endlessMode, secretTour) {
+    const useSecretSpan = Boolean(secretTour || score >= TOUR_FINISH);
+    const totalSpan = useSecretSpan ? SECRET_FINISH : TOUR_FINISH;
+    const maxCount = useSecretSpan ? LIST.length : 6;
+    const wrappedScore = endlessMode ? modPositive(score, totalSpan) : clamp(score, 0, totalSpan - 0.001);
+    const idx = Math.min(maxCount - 1, Math.floor(wrappedScore / CAMPUS_SPAN));
     const current = LIST[idx];
-    const nextIdx = (idx + 1) % LIST.length;
+    const nextIdx = (idx + 1) % maxCount;
     const next = LIST[nextIdx];
     const localScore = wrappedScore - current.startScore;
     const remaining = CAMPUS_SPAN - localScore;
 
     let blend = 0;
-    const allowBlendNext = endlessMode || idx < LIST.length - 1;
+    const allowBlendNext = endlessMode || idx < maxCount - 1;
     if (allowBlendNext && remaining < TRANSITION_PTS) {
       blend = clamp(1 - remaining / TRANSITION_PTS, 0, 1);
     }
 
-    const cycleIndex = endlessMode ? Math.floor(score / TOUR_FINISH) : 0;
+    const cycleIndex = endlessMode ? Math.floor(score / totalSpan) : 0;
     return {
       current: current,
       next: next,
       blend: blend,
       index: idx,
-      cycleIndex: cycleIndex
+      cycleIndex: cycleIndex,
+      dinoNight: current.id === 'dino-desert' && isDinoNight(wrappedScore)
     };
   }
 
@@ -299,7 +408,8 @@
       ctx.restore();
     }
 
-    // Sun / Twilight orb
+    // Sun / Twilight orb (skip on secret levels that render custom sky celestial art)
+    if (pA.noSun && t < 0.5) return;
     const sunX = lerp(pA.sunX, pB.sunX, t);
     const sunY = lerp(pA.sunY, pB.sunY, t);
     const sunGlow = lerpHexColor(pA.sunGlow, pB.sunGlow, t);
@@ -1536,7 +1646,689 @@
     }
   }
 
-  function drawCampusLayers(ctx, campusId, worldDist, timeSec, palette, alpha) {
+  // =========================================================================
+  // SECRET LEVEL 7: THE CLOUD / TPU DATA CENTER
+  // =========================================================================
+  function drawCloudTpuFar(ctx, worldDist, timeSec) {
+    // Vault steel ceiling ribs & Gemini neural constellation
+    const ribSpan = 260;
+    const ribShift = modPositive(worldDist * 0.05, ribSpan);
+    ctx.strokeStyle = 'rgba(66, 133, 244, 0.16)';
+    ctx.lineWidth = 2;
+    for (let x = -ribShift; x < STAGE_W + ribSpan; x += ribSpan) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 34, GROUND_Y);
+      ctx.stroke();
+    }
+
+    // Glowing Gemini neural network nodes in the upper vault
+    const nodeSpan = 480;
+    const nodeShift = modPositive(worldDist * 0.07, nodeSpan);
+    const pts = [[45, 58], [125, 36], [210, 72], [305, 42], [395, 68], [450, 34]];
+    for (let rep = -1; rep <= 2; rep++) {
+      const bx = -nodeShift + rep * nodeSpan;
+      ctx.strokeStyle = 'rgba(126, 249, 255, 0.22)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let i = 0; i < pts.length - 1; i++) {
+        ctx.moveTo(bx + pts[i][0], pts[i][1]);
+        ctx.lineTo(bx + pts[i + 1][0], pts[i + 1][1]);
+      }
+      ctx.stroke();
+      for (let i = 0; i < pts.length; i++) {
+        const pulse = 0.55 + 0.45 * Math.sin(timeSec * 3.2 + i * 1.4);
+        ctx.fillStyle = i % 2 === 0
+          ? 'rgba(0, 229, 255, ' + pulse.toFixed(2) + ')'
+          : 'rgba(179, 136, 255, ' + pulse.toFixed(2) + ')';
+        ctx.beginPath();
+        ctx.arc(bx + pts[i][0], pts[i][1], 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawCloudTpuMid(ctx, worldDist, timeSec) {
+    // Iconic Google 4-color Data Center overhead cooling pipes
+    const pipes = [
+      { y: 92, col: '#4285F4', hi: '#8ab4f8' },
+      { y: 106, col: '#EA4335', hi: '#f6aea9' },
+      { y: 120, col: '#FBBC04', hi: '#fde293' },
+      { y: 134, col: '#34A853', hi: '#81c995' }
+    ];
+    for (let i = 0; i < pipes.length; i++) {
+      ctx.fillStyle = pipes[i].col;
+      ctx.fillRect(0, pipes[i].y, STAGE_W, 8);
+      ctx.fillStyle = pipes[i].hi;
+      ctx.fillRect(0, pipes[i].y + 1.5, STAGE_W, 2);
+    }
+
+    // Pipe flange joints + TPU server pod aisles
+    const span = 320;
+    const shift = modPositive(worldDist * 0.13, span);
+    for (let rep = -1; rep <= 3; rep++) {
+      const ox = -shift + rep * span;
+
+      // Pipe collar brackets
+      ctx.fillStyle = '#26344d';
+      ctx.fillRect(ox + 34, 88, 10, 58);
+      ctx.fillRect(ox + 194, 88, 10, 58);
+
+      // TPU Pod server rack bank
+      for (let r = 0; r < 3; r++) {
+        const rx = ox + 58 + r * 44;
+        const ry = GROUND_Y - 118;
+        ctx.fillStyle = '#111a2e';
+        ctx.strokeStyle = '#2c426b';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(rx, ry, 36, 118);
+        ctx.strokeRect(rx, ry, 36, 118);
+
+        // Glowing TPU blade rows + blinking status LEDs
+        for (let row = 0; row < 8; row++) {
+          const by = ry + 10 + row * 12.5;
+          ctx.fillStyle = '#1b2c4c';
+          ctx.fillRect(rx + 4, by, 28, 7);
+          const blink = Math.sin(timeSec * 5 + r * 2.1 + row * 0.9) > 0.15;
+          ctx.fillStyle = blink ? (row % 3 === 0 ? '#00e5ff' : '#34a853') : '#1c3e5e';
+          ctx.fillRect(rx + 7, by + 2, 4, 3);
+          ctx.fillStyle = row % 2 === 0 ? '#8ab4f8' : '#b388ff';
+          ctx.fillRect(rx + 14, by + 2.5, 14, 2);
+        }
+      }
+
+      // Subtle glowing TPU POD sign
+      ctx.fillStyle = '#0d1b36';
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(ox + 214, GROUND_Y - 94, 82, 22, 5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#7ef9ff';
+      ctx.font = '700 8.5px ui-monospace, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('TPU POD v6', ox + 255, GROUND_Y - 80);
+    }
+  }
+
+  function drawCloudTpuFore(ctx, worldDist) {
+    const span = 280;
+    const shift = modPositive(worldDist * 0.30, span);
+    for (let rep = -1; rep <= 4; rep++) {
+      const ox = -shift + rep * span;
+      // Fiber-optic conduit stanchions
+      ctx.fillStyle = '#20314f';
+      ctx.fillRect(ox + 40, GROUND_Y - 40, 5, 40);
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(ox + 41.5, GROUND_Y - 36, 2, 24);
+      // Glowing fiber strip along base
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.38)';
+      ctx.fillRect(ox, GROUND_Y - 12, span, 2);
+    }
+  }
+
+  // =========================================================================
+  // SECRET LEVEL 8: GOOGLE X -> THE MOON (MOONSHOT FACTORY)
+  // =========================================================================
+  function drawMoonshotFar(ctx, worldDist, timeSec) {
+    // Glowing Earth rising on the lunar horizon!
+    const earthX = 760 - modPositive(worldDist * 0.015, 220);
+    const earthY = 98;
+    const earthR = 42;
+    ctx.save();
+    const atmo = ctx.createRadialGradient(earthX, earthY, earthR * 0.85, earthX, earthY, earthR * 1.45);
+    atmo.addColorStop(0, 'rgba(79, 195, 247, 0.45)');
+    atmo.addColorStop(1, 'rgba(79, 195, 247, 0)');
+    ctx.fillStyle = atmo;
+    ctx.beginPath();
+    ctx.arc(earthX, earthY, earthR * 1.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ocean sphere
+    ctx.beginPath();
+    ctx.arc(earthX, earthY, earthR, 0, Math.PI * 2);
+    ctx.clip();
+    const ocean = ctx.createRadialGradient(earthX - 14, earthY - 14, 4, earthX, earthY, earthR);
+    ocean.addColorStop(0, '#4fc3f7');
+    ocean.addColorStop(0.7, '#1a73e8');
+    ocean.addColorStop(1, '#0b2e6f');
+    ctx.fillStyle = ocean;
+    ctx.fillRect(earthX - earthR, earthY - earthR, earthR * 2, earthR * 2);
+
+    // Continents
+    ctx.fillStyle = '#4caf50';
+    ctx.beginPath();
+    ctx.ellipse(earthX - 10, earthY - 8, 14, 10, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(earthX + 15, earthY + 8, 12, 16, 0.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Swirl clouds
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(earthX - 4, earthY - 16, 18, 4.5, 0.15, 0, Math.PI * 2);
+    ctx.ellipse(earthX + 8, earthY + 14, 16, 4, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Distant floating Project Loon balloon + Wing drone silhouette
+    const loonX = 240 - modPositive(worldDist * 0.04, 1060) + 120;
+    const loonY = 66 + Math.sin(timeSec * 1.6) * 5;
+    ctx.save();
+    ctx.fillStyle = 'rgba(220, 232, 255, 0.65)';
+    ctx.beginPath();
+    ctx.arc(loonX, loonY, 11, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(220, 232, 255, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(loonX, loonY + 11);
+    ctx.lineTo(loonX, loonY + 20);
+    ctx.stroke();
+    ctx.fillStyle = '#4285F4';
+    ctx.fillRect(loonX - 4, loonY + 20, 8, 3);
+    ctx.restore();
+
+    // Distant lunar ridge silhouette
+    const ridgeSpan = 480;
+    const ridgeShift = modPositive(worldDist * 0.06, ridgeSpan);
+    ctx.fillStyle = '#383e4d';
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y);
+    for (let x = -ridgeShift; x <= STAGE_W + ridgeSpan; x += 120) {
+      ctx.lineTo(x + 40, GROUND_Y - 72);
+      ctx.lineTo(x + 90, GROUND_Y - 52);
+      ctx.lineTo(x + 120, GROUND_Y - 82);
+    }
+    ctx.lineTo(STAGE_W + ridgeSpan, GROUND_Y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawMoonshotMid(ctx, worldDist, timeSec) {
+    const span = 460;
+    const shift = modPositive(worldDist * 0.13, span);
+    for (let rep = -1; rep <= 3; rep++) {
+      const ox = -shift + rep * span;
+
+      // Lunar crater hills
+      ctx.fillStyle = '#555c6d';
+      ctx.beginPath();
+      ctx.ellipse(ox + 95, GROUND_Y, 85, 34, 0, Math.PI, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#444a59';
+      ctx.beginPath();
+      ctx.ellipse(ox + 95, GROUND_Y - 12, 26, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Google X Moonshot Factory lunar dome base
+      ctx.fillStyle = '#d8dee9';
+      ctx.beginPath();
+      ctx.arc(ox + 265, GROUND_Y - 6, 48, Math.PI, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#8e99ad';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Glowing dome viewport windows
+      ctx.fillStyle = '#7ef9ff';
+      for (let w = 0; w < 4; w++) {
+        ctx.fillRect(ox + 234 + w * 17, GROUND_Y - 26, 10, 8);
+      }
+
+      // Giant yellow/white "X" Moonshot badge on dome
+      ctx.strokeStyle = '#FBBC04';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(ox + 258, GROUND_Y - 44);
+      ctx.lineTo(ox + 272, GROUND_Y - 30);
+      ctx.moveTo(ox + 272, GROUND_Y - 44);
+      ctx.lineTo(ox + 258, GROUND_Y - 30);
+      ctx.stroke();
+
+      // Parabolic deep-space comms dish beside dome
+      ctx.fillStyle = '#9aa0a6';
+      ctx.fillRect(ox + 338, GROUND_Y - 32, 6, 32);
+      ctx.strokeStyle = '#e8eaed';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(ox + 344, GROUND_Y - 44, 18, 0.35 * Math.PI, 1.25 * Math.PI);
+      ctx.stroke();
+      const ping = 0.4 + 0.6 * Math.abs(Math.sin(timeSec * 3));
+      ctx.fillStyle = 'rgba(179, 136, 255, ' + ping.toFixed(2) + ')';
+      ctx.beginPath();
+      ctx.arc(ox + 354, GROUND_Y - 50, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawMoonshotFore(ctx, worldDist) {
+    const span = 260;
+    const shift = modPositive(worldDist * 0.30, span);
+    for (let rep = -1; rep <= 4; rep++) {
+      const ox = -shift + rep * span;
+      // Small lunar craters & beacon posts
+      ctx.fillStyle = '#4c5261';
+      ctx.beginPath();
+      ctx.ellipse(ox + 60, GROUND_Y - 3, 18, 4.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#b8bec9';
+      ctx.fillRect(ox + 185, GROUND_Y - 28, 2.5, 28);
+      ctx.fillStyle = '#b388ff';
+      ctx.beginPath();
+      ctx.arc(ox + 186.2, GROUND_Y - 30, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // =========================================================================
+  // SECRET LEVEL 9: CHROME DINO DESERT (ERR_INTERNET_DISCONNECTED)
+  // =========================================================================
+  function drawDinoDesertFar(ctx, worldDist, dinoNight) {
+    const ink = dinoNight ? '#c8ccd4' : '#535353';
+    const faint = dinoNight ? 'rgba(200, 204, 212, 0.25)' : 'rgba(83, 83, 83, 0.22)';
+
+    // Subtle retro Chrome offline header in sky
+    ctx.save();
+    ctx.fillStyle = faint;
+    ctx.font = '700 11px ui-monospace, Menlo, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('ERR_INTERNET_DISCONNECTED', STAGE_W * 0.5, 44);
+    ctx.restore();
+
+    // Classic blocky Chrome Dino pixel clouds
+    const span = 640;
+    const shift = modPositive(worldDist * 0.05, span);
+    const cloudPos = [[90, 74], [290, 56], [490, 82]];
+    ctx.fillStyle = dinoNight ? '#3a3d45' : '#dcdcdc';
+    for (let rep = -1; rep <= 2; rep++) {
+      for (let i = 0; i < cloudPos.length; i++) {
+        const cx = -shift + rep * span + cloudPos[i][0];
+        const cy = cloudPos[i][1];
+        ctx.fillRect(cx, cy + 8, 46, 6);
+        ctx.fillRect(cx + 8, cy + 2, 28, 6);
+        ctx.fillRect(cx + 16, cy - 3, 14, 5);
+      }
+    }
+
+    // Crescent moon in Chrome Dino Night Mode
+    if (dinoNight) {
+      ctx.save();
+      ctx.fillStyle = '#d8dadf';
+      ctx.beginPath();
+      ctx.arc(820, 62, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#1c1d21';
+      ctx.beginPath();
+      ctx.arc(827, 58, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Distant cheering Pixel T-Rex cameo on a mesa!
+    const rexSpan = 960;
+    const rexShift = modPositive(worldDist * 0.08, rexSpan);
+    const rx = STAGE_W - rexShift;
+    ctx.save();
+    ctx.fillStyle = ink;
+    ctx.globalAlpha = 0.26;
+    // Pixel T-Rex silhouette
+    ctx.fillRect(rx + 12, GROUND_Y - 46, 18, 12); // head
+    ctx.fillRect(rx + 18, GROUND_Y - 43, 3, 3);   // eye cutout skipped via bg? subtle!
+    ctx.fillRect(rx + 8, GROUND_Y - 34, 14, 16);  // torso
+    ctx.fillRect(rx + 2, GROUND_Y - 28, 8, 8);    // tail
+    ctx.fillRect(rx + 10, GROUND_Y - 18, 4, 10);  // leg 1
+    ctx.fillRect(rx + 17, GROUND_Y - 18, 4, 10);  // leg 2
+    ctx.restore();
+  }
+
+  function drawDinoDesertMid(ctx, worldDist, dinoNight) {
+    const mesa = dinoNight ? '#2b2d34' : '#e6e6e6';
+    const span = 520;
+    const shift = modPositive(worldDist * 0.13, span);
+    ctx.fillStyle = mesa;
+    for (let rep = -1; rep <= 3; rep++) {
+      const ox = -shift + rep * span;
+      // Stepped pixel desert mesas
+      ctx.fillRect(ox + 40, GROUND_Y - 22, 110, 22);
+      ctx.fillRect(ox + 60, GROUND_Y - 38, 70, 16);
+      ctx.fillRect(ox + 310, GROUND_Y - 16, 86, 16);
+      ctx.fillRect(ox + 328, GROUND_Y - 28, 48, 12);
+    }
+  }
+
+  function drawDinoDesertFore(ctx, worldDist, dinoNight) {
+    const ink = dinoNight ? '#9aa0a6' : '#535353';
+    const span = 180;
+    const shift = modPositive(worldDist * 0.30, span);
+    ctx.fillStyle = ink;
+    for (let rep = -1; rep <= 6; rep++) {
+      const ox = -shift + rep * span;
+      // Classic Chrome Dino desert pebbles & ground bumps
+      ctx.fillRect(ox + 22, GROUND_Y - 3, 12, 2);
+      ctx.fillRect(ox + 26, GROUND_Y - 5, 4, 2);
+      ctx.fillRect(ox + 110, GROUND_Y - 2, 6, 2);
+    }
+  }
+
+  // =========================================================================
+  // GRAND FINALE: END OF THE EARTH (FLAT EARTH CLIFF + COSMOS + NEON SIGN)
+  // =========================================================================
+  function renderEndOfEarth(ctx, state) {
+    const timeSec = state.timeSec || 0;
+    const viewWidth = state.viewWidth || STAGE_W;
+    const viewOffsetX = state.viewOffsetX || 0;
+    const viewHeight = state.viewHeight || STAGE_H;
+    const stageTop = state.stageTop || 0;
+
+    // 1. Deep Cosmos Background filling the ENTIRE viewport
+    ctx.save();
+    const cosmosGrad = ctx.createLinearGradient(0, -stageTop, viewWidth, viewHeight - stageTop);
+    cosmosGrad.addColorStop(0, '#040612');
+    cosmosGrad.addColorStop(0.45, '#0b0f29');
+    cosmosGrad.addColorStop(0.78, '#170c30');
+    cosmosGrad.addColorStop(1, '#050714');
+    ctx.fillStyle = cosmosGrad;
+    ctx.fillRect(viewOffsetX - 20, -stageTop - 20, viewWidth + 40, viewHeight + 40);
+
+    // Colorful Cosmic Nebulae
+    const nebulae = [
+      { x: viewOffsetX + viewWidth * 0.68, y: 120, r: 220, col: 'rgba(138, 43, 226, 0.24)' },
+      { x: viewOffsetX + viewWidth * 0.48, y: 195, r: 190, col: 'rgba(0, 229, 255, 0.16)' },
+      { x: viewOffsetX + viewWidth * 0.82, y: 215, r: 175, col: 'rgba(255, 61, 245, 0.18)' }
+    ];
+    for (let i = 0; i < nebulae.length; i++) {
+      const n = nebulae[i];
+      const ng = ctx.createRadialGradient(n.x, n.y, 10, n.x, n.y, n.r);
+      ng.addColorStop(0, n.col);
+      ng.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = ng;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Dense organic twinkling starfield across full cosmos
+    for (let s = 0; s < 110; s++) {
+      const hx = Math.sin(s * 127.1 + 311.7) * 43758.5453;
+      const hy = Math.sin(s * 269.5 + 183.3) * 43758.5453;
+      const rx = hx - Math.floor(hx);
+      const ry = hy - Math.floor(hy);
+      const sx = viewOffsetX + rx * Math.max(500, viewWidth);
+      const sy = -stageTop + ry * Math.max(340, viewHeight);
+      const tw = 0.38 + 0.62 * Math.sin(timeSec * (1.8 + (s % 4) * 0.5) + s * 1.7);
+      const rad = s % 10 === 0 ? 2.1 : (s % 3 === 0 ? 1.4 : 0.9);
+      ctx.fillStyle = s % 11 === 0
+        ? 'rgba(126, 249, 255, ' + tw.toFixed(2) + ')'
+        : (s % 13 === 0 ? 'rgba(255, 170, 245, ' + tw.toFixed(2) + ')' : 'rgba(255, 255, 255, ' + tw.toFixed(2) + ')');
+      ctx.beginPath();
+      ctx.arc(sx, sy, rad, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Ringed cosmic planet in upper right cosmos
+    const px = viewOffsetX + viewWidth * 0.87;
+    const py = 56;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.strokeStyle = 'rgba(255, 195, 113, 0.55)';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 34, 9, -0.28, 0, Math.PI * 2);
+    ctx.stroke();
+    const pg = ctx.createRadialGradient(-6, -6, 2, 0, 0, 18);
+    pg.addColorStop(0, '#ffcf98');
+    pg.addColorStop(0.65, '#c864b4');
+    pg.addColorStop(1, '#3c1e5e');
+    ctx.fillStyle = pg;
+    ctx.beginPath();
+    ctx.arc(0, 0, 17, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Occasional shooting star
+    const shootCycle = (timeSec * 0.42) % 3.2;
+    if (shootCycle < 0.7) {
+      const st = shootCycle / 0.7;
+      const sx0 = viewOffsetX + viewWidth * 0.82 - st * 220;
+      const sy0 = 26 + st * 90;
+      const sg = ctx.createLinearGradient(sx0, sy0, sx0 + 54, sy0 - 22);
+      sg.addColorStop(0, 'rgba(255,255,255,0.95)');
+      sg.addColorStop(1, 'rgba(126,249,255,0)');
+      ctx.strokeStyle = sg;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(sx0, sy0);
+      ctx.lineTo(sx0 + 54, sy0 - 22);
+      ctx.stroke();
+    }
+
+    // 2. Flat-Earth Cliff Edge (left side ends sharply into the cosmos!)
+    const cliffX = 342;
+    const slabBottom = STAGE_H + Math.max(80, viewHeight - stageTop - STAGE_H + 40);
+
+    // Rocky subterranean flat-earth slab
+    ctx.fillStyle = '#4a3728';
+    ctx.beginPath();
+    ctx.moveTo(-20, GROUND_Y);
+    ctx.lineTo(cliffX, GROUND_Y);
+    ctx.lineTo(cliffX + 6, GROUND_Y + 14);
+    ctx.lineTo(cliffX - 10, GROUND_Y + 34);
+    ctx.lineTo(cliffX - 22, GROUND_Y + 58);
+    ctx.lineTo(cliffX - 48, slabBottom);
+    ctx.lineTo(-20, slabBottom);
+    ctx.closePath();
+    ctx.fill();
+
+    // Lighter stone strata layer
+    ctx.fillStyle = '#634b38';
+    ctx.beginPath();
+    ctx.moveTo(-20, GROUND_Y + 14);
+    ctx.lineTo(cliffX + 2, GROUND_Y + 14);
+    ctx.lineTo(cliffX - 8, GROUND_Y + 32);
+    ctx.lineTo(-20, GROUND_Y + 32);
+    ctx.closePath();
+    ctx.fill();
+
+    // Asphalt bike path ending right at the cliff
+    ctx.fillStyle = '#6b727a';
+    ctx.fillRect(-20, GROUND_Y + 4, cliffX + 16, 18);
+    ctx.fillStyle = '#42a362';
+    ctx.fillRect(-20, GROUND_Y + 9, cliffX + 12, 8);
+    ctx.fillStyle = '#eef7f0';
+    for (let dx = 12; dx < cliffX - 24; dx += 52) {
+      ctx.fillRect(dx, GROUND_Y + 12, 22, 2);
+    }
+
+    // Grass turf lip overhanging cliff edge
+    ctx.fillStyle = '#52b768';
+    ctx.fillRect(-20, GROUND_Y - 3, cliffX + 22, 7);
+    ctx.fillStyle = '#34a853';
+    ctx.beginPath();
+    ctx.moveTo(cliffX - 2, GROUND_Y + 4);
+    ctx.lineTo(cliffX + 5, GROUND_Y + 12);
+    ctx.lineTo(cliffX - 6, GROUND_Y + 10);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Cartoonish Wooden Sign: "DANGER: END OF THE EARTH"
+    const signX = 294;
+    const signBaseY = GROUND_Y + 2;
+    ctx.save();
+    ctx.translate(signX, signBaseY);
+    ctx.rotate(0.055); // playful cartoonish lean toward the cliff
+
+    // Wooden post
+    ctx.fillStyle = '#6d4528';
+    ctx.strokeStyle = '#3a2212';
+    ctx.lineWidth = 2;
+    ctx.fillRect(-5, -108, 10, 110);
+    ctx.strokeRect(-5, -108, 10, 110);
+
+    // Top plank ("DANGER:")
+    ctx.save();
+    ctx.rotate(-0.04);
+    ctx.fillStyle = '#9e6839';
+    ctx.strokeStyle = '#3a2212';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.roundRect(-64, -104, 128, 28, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    // Wood grain lines
+    ctx.strokeStyle = 'rgba(58, 34, 18, 0.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-56, -96);
+    ctx.lineTo(48, -96);
+    ctx.moveTo(-42, -83);
+    ctx.lineTo(54, -83);
+    ctx.stroke();
+
+    // Silver nail heads
+    ctx.fillStyle = '#d9dee3';
+    ctx.beginPath();
+    ctx.arc(-52, -90, 2.2, 0, Math.PI * 2);
+    ctx.arc(52, -90, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffeb3b';
+    ctx.strokeStyle = '#611a15';
+    ctx.lineWidth = 2.5;
+    ctx.font = '900 13px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeText('DANGER:', 0, -90);
+    ctx.fillText('DANGER:', 0, -90);
+    ctx.restore();
+
+    // Bottom plank ("END OF THE EARTH")
+    ctx.save();
+    ctx.rotate(0.025);
+    ctx.fillStyle = '#8b572c';
+    ctx.strokeStyle = '#3a2212';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.roundRect(-72, -74, 144, 30, 4);
+    ctx.fill();
+    ctx.stroke();
+
+    // Wood grain + nails
+    ctx.strokeStyle = 'rgba(58, 34, 18, 0.28)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-62, -66);
+    ctx.lineTo(58, -66);
+    ctx.moveTo(-50, -51);
+    ctx.lineTo(62, -51);
+    ctx.stroke();
+
+    ctx.fillStyle = '#d9dee3';
+    ctx.beginPath();
+    ctx.arc(-62, -59, 2.2, 0, Math.PI * 2);
+    ctx.arc(62, -59, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff8dc';
+    ctx.strokeStyle = '#3a2212';
+    ctx.lineWidth = 2.4;
+    ctx.font = '900 12px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeText('END OF THE EARTH', 0, -59);
+    ctx.fillText('END OF THE EARTH', 0, -59);
+    ctx.restore();
+    ctx.restore(); // end wooden sign
+
+    // 4. Lit-Up Neon Sign over the Cosmos: "THANKS FOR PLAYING" / "MADE BY GEMINI NEON"
+    const isNarrow = viewWidth < 620;
+    const neonCx = isNarrow ? (viewOffsetX + viewWidth * 0.5) : 648;
+    const neonCy = isNarrow ? Math.max(58, -stageTop * 0.35 + 88) : 138;
+    const signW = isNarrow ? Math.min(viewWidth - 26, 430) : 458;
+    const signH = isNarrow ? 106 : 124;
+
+    // Realistic subtle neon tube hum / flicker
+    const flicker = 0.94 + 0.06 * Math.sin(timeSec * 19.0) * Math.sin(timeSec * 3.7);
+    const pulse = 0.88 + 0.12 * Math.sin(timeSec * 2.6);
+
+    ctx.save();
+    ctx.translate(neonCx, neonCy);
+
+    // Subtle dark glass backing so neon pops cleanly
+    ctx.fillStyle = 'rgba(6, 9, 24, 0.42)';
+    ctx.beginPath();
+    ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
+    ctx.fill();
+
+    // Glowing outer neon border tube (dual-tone cyan/magenta)
+    ctx.save();
+    ctx.globalAlpha = flicker;
+    ctx.strokeStyle = '#38e8ff';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 18 * pulse;
+    ctx.beginPath();
+    ctx.roundRect(-signW * 0.5, -signH * 0.5, signW, signH, 18);
+    ctx.stroke();
+
+    // Inner bright tube filament
+    ctx.strokeStyle = '#d6fbff';
+    ctx.lineWidth = 1.2;
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.restore();
+
+    // MAIN NEON TEXT: "THANKS FOR PLAYING"
+    const mainFontSize = isNarrow ? 25 : 32;
+    ctx.font = '900 ' + mainFontSize + 'px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Outer cyan glow pass
+    ctx.save();
+    ctx.globalAlpha = flicker;
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = 24 * pulse;
+    ctx.strokeStyle = '#00d9ff';
+    ctx.lineWidth = 4;
+    ctx.strokeText('THANKS FOR PLAYING', 0, -16);
+    // Mid bright glow pass
+    ctx.shadowColor = '#7ef9ff';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#c8fbff';
+    ctx.fillText('THANKS FOR PLAYING', 0, -16);
+    // White-hot neon core
+    ctx.shadowBlur = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('THANKS FOR PLAYING', 0, -16);
+    ctx.restore();
+
+    // SUBTEXT NEON: "MADE BY GEMINI NEON"
+    const subFontSize = isNarrow ? 14.5 : 17.5;
+    ctx.font = '800 ' + subFontSize + 'px ui-monospace, SFMono-Regular, Menlo, monospace';
+
+    ctx.save();
+    ctx.globalAlpha = 0.95 + 0.05 * Math.sin(timeSec * 13.0 + 1.1);
+    ctx.shadowColor = '#ff2df0';
+    ctx.shadowBlur = 20 * pulse;
+    ctx.strokeStyle = '#ff3df5';
+    ctx.lineWidth = 3;
+    ctx.strokeText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+    ctx.shadowColor = '#ff9ef8';
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = '#ffd1fc';
+    ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+    ctx.shadowBlur = 2;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('✦ MADE BY GEMINI NEON ✦', 0, 24);
+    ctx.restore();
+
+    ctx.restore(); // end neon sign
+    ctx.restore(); // end cosmos
+  }
+
+  function drawCampusLayers(ctx, campusId, worldDist, timeSec, palette, alpha, dinoNight) {
     if (alpha <= 0.01) return;
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -1564,6 +2356,18 @@
       drawZurichFar(ctx, worldDist);
       drawZurichMid(ctx, worldDist, timeSec);
       drawZurichFore(ctx, worldDist);
+    } else if (campusId === 'cloud-tpu') {
+      drawCloudTpuFar(ctx, worldDist, timeSec);
+      drawCloudTpuMid(ctx, worldDist, timeSec);
+      drawCloudTpuFore(ctx, worldDist);
+    } else if (campusId === 'moonshot-moon') {
+      drawMoonshotFar(ctx, worldDist, timeSec);
+      drawMoonshotMid(ctx, worldDist, timeSec);
+      drawMoonshotFore(ctx, worldDist);
+    } else if (campusId === 'dino-desert') {
+      drawDinoDesertFar(ctx, worldDist, dinoNight);
+      drawDinoDesertMid(ctx, worldDist, dinoNight);
+      drawDinoDesertFore(ctx, worldDist, dinoNight);
     }
     ctx.restore();
   }
@@ -1699,25 +2503,52 @@
   }
 
   function renderBackdrop(ctx, state) {
-    const campusInfo = getCampusState(state.score, state.endlessMode);
+    const campusInfo = getCampusState(state.score, state.endlessMode, state.secretTour);
     const cur = campusInfo.current;
     const nxt = campusInfo.next;
     const blend = campusInfo.blend;
+    const dinoNight = Boolean(campusInfo.dinoNight);
     const endlessNightBoost = state.endlessMode && campusInfo.cycleIndex % 2 === 1 ? 0.65 : 0;
     const bgDist = state.bgDist !== undefined ? state.bgDist : state.worldDist;
 
-    drawSkyAndSun(ctx, cur.palette, nxt.palette, blend, state.timeSec, endlessNightBoost);
-    drawClouds(ctx, bgDist, lerpHexColor(cur.palette.cloudFill, nxt.palette.cloudFill, blend));
+    const DINO_NIGHT_PAL = {
+      skyTop: '#1c1d21',
+      skyMid: '#1c1d21',
+      skyHorizon: '#1c1d21',
+      sunX: 820,
+      sunY: 62,
+      sunColor: '#1c1d21',
+      sunGlow: '#1c1d21',
+      cloudFill: '#3a3d45',
+      farRidge: '#2b2d34',
+      nearRidge: '#3c4043',
+      roadFill: '#1c1d21',
+      curbFill: '#c8ccd4',
+      laneFill: '#24262c',
+      laneStripe: '#9aa0a6',
+      edgeAccent: '#c8ccd4',
+      starsAlpha: 0.75
+    };
 
-    if (blend <= 0.01) {
-      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, cur.palette, 1);
-    } else {
-      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, cur.palette, 1 - blend);
-      drawCampusLayers(ctx, nxt.id, bgDist, state.timeSec, nxt.palette, blend);
+    const curPal = (cur.id === 'dino-desert' && dinoNight) ? DINO_NIGHT_PAL : cur.palette;
+    const nxtPal = (nxt.id === 'dino-desert' && dinoNight) ? DINO_NIGHT_PAL : nxt.palette;
+
+    drawSkyAndSun(ctx, curPal, nxtPal, blend, state.timeSec, cur.isSecret ? 0 : endlessNightBoost);
+    if (!cur.isSecret) {
+      drawClouds(ctx, bgDist, lerpHexColor(curPal.cloudFill, nxtPal.cloudFill, blend));
     }
 
-    drawAtmosphericVeil(ctx, cur.palette, nxt.palette, blend);
-    drawGround(ctx, state.worldDist, cur.palette, nxt.palette, blend);
+    if (blend <= 0.01) {
+      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, curPal, 1, dinoNight);
+    } else {
+      drawCampusLayers(ctx, cur.id, bgDist, state.timeSec, curPal, 1 - blend, dinoNight);
+      drawCampusLayers(ctx, nxt.id, bgDist, state.timeSec, nxtPal, blend, dinoNight);
+    }
+
+    if (!cur.isSecret) {
+      drawAtmosphericVeil(ctx, curPal, nxtPal, blend);
+    }
+    drawGround(ctx, state.worldDist, curPal, nxtPal, blend);
     drawMilestoneGates(ctx, state.score, state.endlessMode);
 
     return campusInfo;
@@ -1730,10 +2561,12 @@
     GROUND_Y: GROUND_Y,
     CAMPUS_SPAN: CAMPUS_SPAN,
     TOUR_FINISH: TOUR_FINISH,
+    SECRET_FINISH: SECRET_FINISH,
     PIXELS_PER_PT: PIXELS_PER_PT,
     LIST: LIST,
     getCampusById: getCampusById,
     getCampusState: getCampusState,
-    renderBackdrop: renderBackdrop
+    renderBackdrop: renderBackdrop,
+    renderEndOfEarth: renderEndOfEarth
   };
 })(window);

@@ -852,6 +852,60 @@ button:disabled {
 .pill-cyan { background-color: #00acc1; }
 .pill-orange { background-color: #f57c00; }
 .pill-purple { background-color: #9334e6; }
+.pill-neon-cyan { background-color: #00e5ff; }
+.pill-neon-violet { background-color: #b388ff; }
+.pill-dino-gray { background-color: #535353; }
+
+.pill-rank-secret {
+  background: linear-gradient(135deg, #101935 0%, #241345 100%);
+  color: #7ef9ff;
+  border-color: #4f6df5;
+}
+
+.campus-pill-secret {
+  border-color: #c5b4f7;
+  background: linear-gradient(135deg, #fbfaff 0%, #f3f7ff 100%);
+}
+
+.secret-cta-btn {
+  background: linear-gradient(135deg, #1a73e8 0%, #7c3aed 100%);
+  border-color: #6d28d9;
+}
+
+/* End of the Earth unobtrusive bottom-right cosmos bar */
+.stage-overlay-eoe {
+  background: transparent;
+  backdrop-filter: none;
+  align-items: end;
+  justify-items: end;
+  padding: 14px 18px;
+  pointer-events: none;
+}
+
+.eoe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.eoe-btn {
+  background: rgb(10 14 34 / 0.78);
+  color: #e6f7ff;
+  border: 1.5px solid rgb(126 249 255 / 0.55);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.45);
+}
+
+.eoe-btn-primary {
+  background: linear-gradient(135deg, rgb(0 217 255 / 0.25) 0%, rgb(255 61 245 / 0.28) 100%);
+  border-color: #7ef9ff;
+  color: #ffffff;
+}
 
 .pill-meta {
   display: flex;

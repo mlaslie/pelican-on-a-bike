@@ -36,11 +36,21 @@
     constructor() {
       this.x = ANCHOR_X;
       this.touchMode = false;
+      this.gravityScale = 1;
+      this.wearsHelmet = false;
       this.reset();
     }
 
     setTouchMode(active) {
       this.touchMode = Boolean(active);
+    }
+
+    setGravityScale(scale) {
+      this.gravityScale = clamp(scale || 1, 0.55, 1.3);
+    }
+
+    setHelmet(on) {
+      this.wearsHelmet = Boolean(on);
     }
 
     reset() {
@@ -179,9 +189,9 @@
 
       // Apply Chrome-Dino variable jump height and airborne fast-fall
       if (!this.grounded) {
-        let g = GRAVITY;
+        let g = GRAVITY * this.gravityScale;
         if (this.ducking) {
-          g *= FAST_FALL_MULT;
+          g = GRAVITY * FAST_FALL_MULT;
         } else if (this.vy < 0 && !this.jumpHeld) {
           g *= JUMP_CUT_MULT;
         }
@@ -708,6 +718,32 @@
           ctx.lineTo(eyeX + 2.5, eyeY - 2.4);
         }
         ctx.stroke();
+      }
+
+      // Moonshot glass space helmet bubble when riding on the Moon!
+      if (this.wearsHelmet) {
+        ctx.save();
+        const hx = headX + 12;
+        const hy = headY + 1;
+        const hGrad = ctx.createRadialGradient(hx - 8, hy - 8, 3, hx, hy, 22);
+        hGrad.addColorStop(0, 'rgba(255, 255, 255, 0.34)');
+        hGrad.addColorStop(0.65, 'rgba(130, 210, 255, 0.14)');
+        hGrad.addColorStop(1, 'rgba(179, 136, 255, 0.32)');
+        ctx.fillStyle = hGrad;
+        ctx.strokeStyle = 'rgba(220, 240, 255, 0.85)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.ellipse(hx, hy, 22, 16, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(hx - 4, hy - 2, 13, 1.15 * Math.PI, 1.48 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
       }
 
       // Front pedaling leg in front of frame

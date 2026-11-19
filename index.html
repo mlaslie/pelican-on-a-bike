@@ -236,9 +236,17 @@
                 </div>
               </dl>
               <div class="overlay-actions">
-                <button id="btn-continue-endless" type="button" class="primary-btn">Continue Endless Mode</button>
-                <button id="btn-play-again-victory" type="button" class="secondary-btn">Play Tour Again</button>
+                <button id="btn-enter-secrets" type="button" class="primary-btn secret-cta-btn">Enter Secret Levels (Lvl 7–9)</button>
+                <button id="btn-continue-endless" type="button" class="secondary-btn">Endless Mode</button>
+                <button id="btn-play-again-victory" type="button" class="secondary-btn">Play Again</button>
               </div>
+            </div>
+          </div>
+
+          <div id="overlay-end-of-earth" class="stage-overlay stage-overlay-eoe" hidden>
+            <div class="eoe-actions">
+              <button id="btn-eoe-endless" type="button" class="eoe-btn eoe-btn-primary">Continue Endless</button>
+              <button id="btn-eoe-restart" type="button" class="eoe-btn">Play Again</button>
             </div>
           </div>
 
@@ -416,6 +424,42 @@
               <span class="pill-landmark">Bay View &amp; Googleplex</span>
             </span>
             <span class="pill-range">1750 pts</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="secret-picker-section" class="picker-section secret-picker-section" aria-label="Secret Levels" hidden>
+        <div class="picker-header">
+          <h2>Secret Levels Unlocked — Beyond Earth</h2>
+          <p class="picker-note">Conquer all 3 to reach the End of the Earth (3,150 pts).</p>
+        </div>
+
+        <div class="campus-picker" role="group" aria-label="Jump to secret level">
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="cloud-tpu">
+            <span class="pill-swatch pill-neon-cyan" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">The Cloud <span class="pill-rank pill-rank-secret">LVL 7 · SECRET</span></span>
+              <span class="pill-landmark">TPU Data Center</span>
+            </span>
+            <span class="pill-range">2100 pts</span>
+          </button>
+
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="moonshot-moon">
+            <span class="pill-swatch pill-neon-violet" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">The Moon <span class="pill-rank pill-rank-secret">LVL 8 · SECRET</span></span>
+              <span class="pill-landmark">Google X Moonshot (Low-G)</span>
+            </span>
+            <span class="pill-range">2450 pts</span>
+          </button>
+
+          <button type="button" class="campus-pill campus-pill-secret" data-campus="dino-desert">
+            <span class="pill-swatch pill-dino-gray" aria-hidden="true"></span>
+            <span class="pill-meta">
+              <span class="pill-city">Dino Desert <span class="pill-rank pill-rank-secret">LVL 9 · SECRET</span></span>
+              <span class="pill-landmark">ERR_INTERNET_DISCONNECTED</span>
+            </span>
+            <span class="pill-range">2800 pts</span>
           </button>
         </div>
       </section>

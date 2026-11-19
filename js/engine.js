@@ -9,6 +9,7 @@
   const HI_GOOGLER_KEY = 'pelicanBikeHighScoreGoogler';
   const HI_NOOGLER_KEY = 'pelicanBikeHighScoreNoogler';
   const SPEED_MODE_KEY = 'pelicanBikeSpeedMode';
+  const SECRETS_UNLOCKED_KEY = 'pelicanBikeSecretsUnlocked';
   const NOOGLER_SPEED = 380;
   const GOOGLER_START_SPEED = 370;
   const GOOGLER_TOUR_MAX_SPEED = 720;
@@ -44,6 +45,8 @@
       this.bgDist = 0;
       this.timeSec = 0;
       this.endlessMode = false;
+      this.secretTour = false;
+      this.secretsUnlocked = false;
       this.isPreview = false;
       this.startCampusId = 'sydney';
       this.lastCampusId = 'sydney';
@@ -78,6 +81,9 @@
         const storedN = parseInt(global.localStorage.getItem(HI_NOOGLER_KEY) || '0', 10);
         if (!Number.isNaN(storedN) && storedN > 0) {
           this.highScores.noogler = storedN;
+        }
+        if (global.localStorage.getItem(SECRETS_UNLOCKED_KEY) === '1') {
+          this.secretsUnlocked = true;
         }
       } catch (_) {}
 
@@ -186,6 +192,7 @@
       this.startCampusId = campus.id;
       this.isPreview = campus.id !== 'sydney';
       this.endlessMode = false;
+      this.secretTour = Boolean(campus.isSecret);
       this.score = campus.startScore;
       this.runPoints = 0;
       this.runTime = 0;
@@ -204,6 +211,8 @@
       this.particles = [];
 
       this.pelican.reset();
+      this.pelican.setGravityScale(campus.id === 'moonshot-moon' ? 0.72 : 1);
+      this.pelican.setHelmet(campus.id === 'moonshot-moon');
       this.obstacles.reset();
       this.powerups.reset();
 
@@ -211,6 +220,76 @@
       this.showCampusToast(campus);
       this.emitState();
       this.emitHud(true);
+    }
+
+    unlockSecrets(showToast) {
+      const wasUnlocked = this.secretsUnlocked;
+      this.secretsUnlocked = true;
+      try {
+        global.localStorage.setItem(SECRETS_UNLOCKED_KEY, '1');
+      } catch (_) {}
+      if (showToast && !wasUnlocked) {
+        this.Audio.playVictory();
+        this.toast = {
+          kicker: 'SECRET LEVELS UNLOCKED!',
+          title: 'Lvl 7 Cloud · Lvl 8 Moon · Lvl 9 Dino Desert',
+          color: '#00E5FF',
+          timer: 3.4,
+          duration: 3.4
+        };
+      }
+      this.emitState();
+      return !wasUnlocked;
+    }
+
+    enterSecretLevels() {
+      this.unlockSecrets(false);
+      this.secretTour = true;
+      this.endlessMode = false;
+      this.score = Math.max(this.score, this.Campuses.TOUR_FINISH);
+      this.worldDist = this.score * this.Campuses.PIXELS_PER_PT;
+      this.bgDist = this.worldDist;
+      this.pelican.setHappy(false);
+      this.pelican.setGravityScale(1);
+      this.pelican.setHelmet(false);
+      this.obstacles.reset();
+      this.powerups.reset();
+      this.state = 'playing';
+      const cloudCampus = this.Campuses.getCampusById('cloud-tpu');
+      this.lastCampusId = cloudCampus.id;
+      this.visitedCampuses.add(cloudCampus.id);
+      this.showCampusToast(cloudCampus);
+      this.emitState();
+      this.emitHud(true);
+    }
+
+    triggerEndOfEarth() {
+      this.state = 'end-of-earth';
+      this.score = Math.max(this.score, this.Campuses.SECRET_FINISH);
+      this.pelican.y = GROUND_Y;
+      this.pelican.vy = 0;
+      this.pelican.grounded = true;
+      this.pelican.setDuck(false);
+      this.pelican.setHappy(true);
+      this.pelican.setGravityScale(1);
+      this.pelican.setHelmet(false);
+      this.obstacles.reset();
+      this.powerups.reset();
+      this.toast = null;
+      this.Audio.playVictory();
+      this.saveHighScoreIfEligible();
+      this.emitHud(true);
+      this.emitState();
+    }
+
+    jumpToEndOfEarth() {
+      this.secretTour = true;
+      this.endlessMode = false;
+      this.score = this.Campuses.SECRET_FINISH;
+      this.worldDist = this.score * this.Campuses.PIXELS_PER_PT;
+      this.bgDist = this.worldDist;
+      this.pelican.reset();
+      this.triggerEndOfEarth();
     }
 
     continueEndless() {
@@ -427,6 +506,10 @@
     triggerVictory() {
       this.score = this.Campuses.TOUR_FINISH;
       this.state = 'victory';
+      this.secretsUnlocked = true;
+      try {
+        global.localStorage.setItem(SECRETS_UNLOCKED_KEY, '1');
+      } catch (_) {}
       this.invincibleTimer = 0;
       this.reviveShieldTimer = 0;
       this.pelican.setShieldState(0, 0);
@@ -542,7 +625,7 @@
         return;
       }
 
-      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive' || this.state === 'respawn-unlocked') {
+      if (this.state === 'gameover' || this.state === 'victory' || this.state === 'revive' || this.state === 'respawn-unlocked' || this.state === 'end-of-earth') {
         this.pelican.update(dt, 0, false, false);
         return;
       }
@@ -597,15 +680,21 @@
         }
       }
 
-      // World Tour Finish check
-      if (!this.endlessMode && this.score >= this.Campuses.TOUR_FINISH) {
+      // World Tour Finish (6-campus) or Secret World Finale (End of the Earth)
+      if (!this.endlessMode && !this.secretTour && this.score >= this.Campuses.TOUR_FINISH) {
         this.triggerVictory();
         return;
       }
+      if (!this.endlessMode && this.secretTour && this.score >= this.Campuses.SECRET_FINISH) {
+        this.triggerEndOfEarth();
+        return;
+      }
 
-      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode);
+      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
       const activeCampus = campusState.current;
       this.visitedCampuses.add(activeCampus.id);
+      this.pelican.setGravityScale(activeCampus.id === 'moonshot-moon' ? 0.72 : 1);
+      this.pelican.setHelmet(activeCampus.id === 'moonshot-moon');
 
       if (activeCampus.id !== this.lastCampusId) {
         this.lastCampusId = activeCampus.id;
@@ -795,8 +884,25 @@
       ctx.save();
       ctx.scale(sx, sy);
 
+      if (this.state === 'end-of-earth') {
+        if (this.viewOffsetX !== 0 || this.stageTop !== 0) {
+          ctx.translate(-this.viewOffsetX, this.stageTop);
+        }
+        this.Campuses.renderEndOfEarth(ctx, {
+          timeSec: this.timeSec,
+          viewWidth: this.viewWidth,
+          viewOffsetX: this.viewOffsetX,
+          viewHeight: this.viewHeight,
+          stageTop: this.stageTop
+        });
+        this.pelican.draw(ctx, 0, this.timeSec);
+        this.drawParticles(ctx);
+        ctx.restore();
+        return this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
+      }
+
       if (this.viewHeight > STAGE_H) {
-        const stateInfo = this.Campuses.getCampusState(this.score, this.endlessMode);
+        const stateInfo = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
         const pal = stateInfo.current.palette;
         if (this.stageTop > 0) {
           ctx.fillStyle = pal.skyTop;
@@ -820,10 +926,11 @@
         worldDist: this.worldDist,
         bgDist: this.bgDist,
         timeSec: this.timeSec,
-        endlessMode: this.endlessMode
+        endlessMode: this.endlessMode,
+        secretTour: this.secretTour
       });
 
-      this.obstacles.draw(ctx, this.timeSec);
+      this.obstacles.draw(ctx, this.timeSec, campusInfo.dinoNight);
       this.powerups.draw(ctx, this.timeSec);
       this.pelican.draw(ctx, this.state === 'playing' ? this.speed : 0, this.timeSec);
       this.drawParticles(ctx);
@@ -841,12 +948,13 @@
       this._lastReportedScore = floored;
       this._lastHudInvincibleBucket = invBucket;
 
-      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode);
+      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
       this.callbacks.onHud({
         score: floored,
         highScore: this.highScore,
         campus: campusState.current,
         endlessMode: this.endlessMode,
+        secretTour: this.secretTour,
         isPreview: this.isPreview,
         speedMode: this.speedMode,
         speed: this.speed,
@@ -860,7 +968,7 @@
 
     emitState() {
       if (!this.callbacks.onStateChange) return;
-      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode);
+      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
       this.callbacks.onStateChange({
         state: this.state,
         score: Math.floor(this.score),
@@ -871,6 +979,8 @@
         visitedCount: this.visitedCampuses.size,
         campus: campusState.current,
         endlessMode: this.endlessMode,
+        secretTour: this.secretTour,
+        secretsUnlocked: this.secretsUnlocked,
         isPreview: this.isPreview,
         speedMode: this.speedMode,
         speed: this.speed,
