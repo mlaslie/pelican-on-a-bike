@@ -14,7 +14,19 @@
   const GOOGLER_TOUR_MAX_SPEED = 720;
   const GOOGLER_ENDLESS_MAX_SPEED = 880;
   const GEMINI_DURATION = 6.0;
+  const ESPRESSO_DURATION = 2.8;
   const REVIVE_SHIELD_DURATION = 2.2;
+  const CAMPUS_HATS = {
+    sydney: 'noogler',
+    zurich: 'alpine',
+    london: 'bowler',
+    'new-york': 'shades',
+    tokyo: 'headband',
+    'mountain-view': 'noogler',
+    'cloud-tpu': 'visor',
+    'moonshot-moon': 'helmet',
+    'dino-desert': 'pixel'
+  };
 
   function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
@@ -58,10 +70,13 @@
       this.respawnSplashTimestamp = 0;
       this.isNewHighScore = false;
       this.invincibleTimer = 0;
+      this.espressoTimer = 0;
       this.reviveShieldTimer = 0;
       this.gCount = 0;
       this.freeContinues = 0;
       this._lastHudInvincibleBucket = -1;
+      this._lastHudEspressoBucket = -1;
+      this.floatingTexts = [];
 
       this.speedMode = 'googler';
       this.highScores = { googler: 0, noogler: 0 };
@@ -206,15 +221,18 @@
       this.lastMilestoneBucket = Math.floor(this.score / 100);
       this.isNewHighScore = false;
       this.invincibleTimer = 0;
+      this.espressoTimer = 0;
       this.reviveShieldTimer = 0;
       this.gCount = 0;
       this.freeContinues = 0;
       this._lastHudInvincibleBucket = -1;
+      this._lastHudEspressoBucket = -1;
+      this.floatingTexts = [];
       this.particles = [];
 
       this.pelican.reset();
       this.pelican.setGravityScale(campus.id === 'moonshot-moon' ? 0.72 : 1);
-      this.pelican.setHelmet(campus.id === 'moonshot-moon');
+      this.pelican.setHat(CAMPUS_HATS[campus.id] || 'noogler');
       this.obstacles.reset();
       this.powerups.reset();
 
@@ -222,6 +240,27 @@
       this.showCampusToast(campus);
       this.emitState();
       this.emitHud(true);
+    }
+
+    syncRidingMusic() {
+      if (this.state === 'playing') {
+        if (this.Audio.startRidingMusic) {
+          this.Audio.startRidingMusic(() => this.speed);
+        }
+      } else if (this.Audio.stopRidingMusic) {
+        this.Audio.stopRidingMusic();
+      }
+    }
+
+    spawnFloatingText(x, y, text, color) {
+      this.floatingTexts.push({
+        x: x,
+        y: y,
+        text: text,
+        color: color || '#FBBC04',
+        life: 0.95,
+        maxLife: 0.95
+      });
     }
 
     unlockSecretUpTo(levelCount, showToast) {
@@ -257,7 +296,9 @@
       this.bgDist = this.worldDist;
       this.pelican.setHappy(false);
       this.pelican.setGravityScale(1);
-      this.pelican.setHelmet(false);
+      this.pelican.setHat('crown');
+      this.espressoTimer = 0;
+      this.pelican.setWheelieTimer(0);
       this.obstacles.reset();
       this.powerups.reset();
       this.state = 'playing';
@@ -279,7 +320,9 @@
       this.pelican.setDuck(false);
       this.pelican.setHappy(true);
       this.pelican.setGravityScale(1);
-      this.pelican.setHelmet(false);
+      this.pelican.setHat('crown');
+      this.espressoTimer = 0;
+      this.pelican.setWheelieTimer(0);
       this.obstacles.reset();
       this.powerups.reset();
       this.toast = null;
@@ -308,6 +351,7 @@
       this.endlessMode = true;
       this.pelican.setHappy(false);
       this.state = 'playing';
+      this.syncRidingMusic();
       this.toast = {
         kicker: 'ENDLESS MODE UNLOCKED',
         title: 'Keep pedaling — speed & difficulty ramp up!',
@@ -624,6 +668,12 @@
 
       this.timeSec += dt;
       this.updateParticles(dt);
+      for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = this.floatingTexts[i];
+        ft.life -= dt;
+        ft.y -= 36 * dt;
+        if (ft.life <= 0) this.floatingTexts.splice(i, 1);
+      }
 
       if (this.toast) {
         this.toast.timer -= dt;
@@ -652,11 +702,17 @@
       this.runTime += dt;
       this.speed = this.computeSpeed();
       const deltaDist = this.speed * dt;
-      const deltaScore = deltaDist * SCORE_RATE;
+      const scoreMult = this.espressoTimer > 0 ? 2 : 1;
+      const deltaScore = deltaDist * SCORE_RATE * scoreMult;
       this.worldDist += deltaDist;
       this.bgDist += Math.min(this.speed, 400) * dt;
       this.score += deltaScore;
       this.runPoints += deltaScore;
+
+      if (this.espressoTimer > 0) {
+        this.espressoTimer = Math.max(0, this.espressoTimer - dt);
+      }
+      this.pelican.setWheelieTimer(this.espressoTimer);
 
       if (this.invincibleTimer > 0) {
         this.invincibleTimer = Math.max(0, this.invincibleTimer - dt);
@@ -708,7 +764,7 @@
       const activeCampus = campusState.current;
       this.visitedCampuses.add(activeCampus.id);
       this.pelican.setGravityScale(activeCampus.id === 'moonshot-moon' ? 0.72 : 1);
-      this.pelican.setHelmet(activeCampus.id === 'moonshot-moon');
+      this.pelican.setHat(CAMPUS_HATS[activeCampus.id] || 'noogler');
 
       if (activeCampus.id !== this.lastCampusId) {
         this.lastCampusId = activeCampus.id;
@@ -806,12 +862,44 @@
             this.callbacks.onPowerup('google-g', this.gCount);
           }
           this.emitHud(true);
+        } else if (item.kind === 'espresso') {
+          this.espressoTimer = ESPRESSO_DURATION;
+          this.pelican.setWheelieTimer(this.espressoTimer);
+          if (this.Audio.playEspresso) this.Audio.playEspresso();
+          this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 36, 12, ['#FBBC04', '#EA4335', '#ffffff']);
+          this.spawnFloatingText(this.pelican.x + 46, this.pelican.y - 68, '☕ 2× WHEELIE!', '#FBBC04');
+          this.emitHud(true);
         }
       }
 
       this.pelican.setShieldState(this.invincibleTimer, this.reviveShieldTimer);
 
-      const hitObs = this.obstacles.findCollision(this.pelican.getHitbox());
+      const pelHb = this.pelican.getHitbox();
+      // Track close-call clearance for obstacles passing near the pelican
+      if (this.invincibleTimer <= 0) {
+        const obsItems = this.obstacles.items;
+        for (let i = 0; i < obsItems.length; i++) {
+          const o = obsItems[i];
+          if (o.smashed || o.closeCallAwarded) continue;
+          const overlapsX = pelHb.x < o.x + o.w && pelHb.x + pelHb.w > o.x;
+          if (overlapsX) {
+            const gap = o.isAerial
+              ? (pelHb.y - (o.y + o.h))
+              : (o.y - (pelHb.y + pelHb.h));
+            if (gap >= -2 && (o.minClearance === undefined || gap < o.minClearance)) {
+              o.minClearance = gap;
+            }
+          } else if (o.x + o.w < pelHb.x && o.minClearance !== undefined && o.minClearance <= 26) {
+            o.closeCallAwarded = true;
+            this.score += 15;
+            this.runPoints += 15;
+            if (this.Audio.playCloseCall) this.Audio.playCloseCall();
+            this.spawnFloatingText(this.pelican.x + 48, this.pelican.y - 66, '+15 CLOSE CALL!', '#00E5FF');
+          }
+        }
+      }
+
+      const hitObs = this.obstacles.findCollision(pelHb);
       if (hitObs) {
         if (this.invincibleTimer > 0) {
           this.obstacles.smashObstacle(hitObs);
@@ -973,21 +1061,43 @@
       this.powerups.draw(ctx, this.timeSec);
       this.pelican.draw(ctx, this.state === 'playing' ? this.speed : 0, this.timeSec);
       this.drawParticles(ctx);
+      this.drawFloatingTexts(ctx);
       this.drawToast(ctx);
 
       ctx.restore();
       return campusInfo;
     }
 
+    drawFloatingTexts(ctx) {
+      if (this.floatingTexts.length === 0) return;
+      ctx.save();
+      ctx.font = '900 13px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (let i = 0; i < this.floatingTexts.length; i++) {
+        const ft = this.floatingTexts[i];
+        const alpha = clamp(ft.life / (ft.maxLife * 0.45), 0, 1);
+        ctx.globalAlpha = alpha;
+        ctx.lineWidth = 3.2;
+        ctx.strokeStyle = 'rgba(20, 24, 31, 0.85)';
+        ctx.strokeText(ft.text, ft.x, ft.y);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+      }
+      ctx.restore();
+    }
+
     emitHud(force) {
       if (!this.callbacks.onHud) return;
       const floored = Math.floor(this.score);
       const invBucket = this.invincibleTimer > 0 ? Math.ceil(this.invincibleTimer * 10) : 0;
-      if (!force && floored === this._lastReportedScore && invBucket === this._lastHudInvincibleBucket) return;
+      const espBucket = this.espressoTimer > 0 ? Math.ceil(this.espressoTimer * 10) : 0;
+      if (!force && floored === this._lastReportedScore && invBucket === this._lastHudInvincibleBucket && espBucket === this._lastHudEspressoBucket) return;
       this._lastReportedScore = floored;
       this._lastHudInvincibleBucket = invBucket;
+      this._lastHudEspressoBucket = espBucket;
 
-      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
+      const campusState = this.Campuses.getCampusState(this.score, this.endlessMode);
       this.callbacks.onHud({
         score: floored,
         highScore: this.highScore,
@@ -1001,11 +1111,13 @@
         gCount: this.gCount,
         freeContinues: this.freeContinues,
         invincibleTimer: this.invincibleTimer,
+        espressoTimer: this.espressoTimer,
         reviveShieldTimer: this.reviveShieldTimer
       });
     }
 
     emitState() {
+      this.syncRidingMusic();
       if (!this.callbacks.onStateChange) return;
       const campusState = this.Campuses.getCampusState(this.score, this.endlessMode, this.secretTour);
       this.callbacks.onStateChange({

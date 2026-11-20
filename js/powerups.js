@@ -137,6 +137,70 @@
     ctx.restore();
   }
 
+  // Microkitchen Espresso Cup collectible (triggers 2.8s 2x Score Wheelie!)
+  function drawEspressoCup(ctx, x, y, r, timeSec) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Warm golden caffeine halo
+    const pulse = 0.88 + 0.12 * Math.sin(timeSec * 6.5);
+    const halo = ctx.createRadialGradient(0, 0, 2, 0, 0, r * 1.45 * pulse);
+    halo.addColorStop(0, 'rgba(251, 188, 4, 0.42)');
+    halo.addColorStop(0.65, 'rgba(234, 67, 53, 0.16)');
+    halo.addColorStop(1, 'rgba(251, 188, 4, 0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 1.45 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Animated rising steam curls
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    for (let s = -1; s <= 1; s += 2) {
+      const sway = Math.sin(timeSec * 6 + s) * 2;
+      ctx.beginPath();
+      ctx.moveTo(s * 3.5, -8);
+      ctx.quadraticCurveTo(s * 3.5 + sway, -13, s * 3.5 - sway * 0.5, -17);
+      ctx.stroke();
+    }
+
+    // Cup handle
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.arc(9.5, 1, 4.2, -Math.PI * 0.45, Math.PI * 0.45);
+    ctx.stroke();
+
+    // Ceramic espresso cup body
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#5f6368';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-9, -6);
+    ctx.lineTo(9, -6);
+    ctx.lineTo(7, 8);
+    ctx.quadraticCurveTo(0, 11, -7, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Tiny Google 4-color stripe on cup
+    const cols = ['#4285F4', '#EA4335', '#FBBC04', '#34A853'];
+    for (let c = 0; c < 4; c++) {
+      ctx.fillStyle = cols[c];
+      ctx.fillRect(-6.5 + c * 3.25, 0.5, 3.3, 2.8);
+    }
+
+    // Rich dark espresso crema top
+    ctx.fillStyle = '#4e342e';
+    ctx.beginPath();
+    ctx.ellipse(0, -6, 8.2, 2.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   class PowerupManager {
     constructor() {
       this.reset();
@@ -146,6 +210,7 @@
       this.items = [];
       this.nextGTimer = randomRange(3.2, 4.8);
       this.nextGeminiTimer = randomRange(6.0, 9.0);
+      this.nextEspressoTimer = randomRange(8.5, 12.5);
       this.riskWaitG = 0;
       this.riskWaitGemini = 0;
     }
@@ -261,6 +326,15 @@
           this.nextGeminiTimer = 0.2;
         }
       }
+
+      this.nextEspressoTimer -= dt;
+      if (this.nextEspressoTimer <= 0) {
+        if (this.spawn('espresso', obstacles, difficulty)) {
+          this.nextEspressoTimer = randomRange(11.0, 16.5);
+        } else {
+          this.nextEspressoTimer = 0.25;
+        }
+      }
     }
 
     checkCollect(pelicanHitbox) {
@@ -300,6 +374,8 @@
 
         if (item.kind === 'gemini') {
           drawGeminiSymbol(ctx, item.x, item.y, item.r, timeSec);
+        } else if (item.kind === 'espresso') {
+          drawEspressoCup(ctx, item.x, item.y, item.r, timeSec);
         } else {
           drawGoogleGLogo(ctx, item.x, item.y, item.r, timeSec);
         }

@@ -319,8 +319,24 @@ button:disabled {
   white-space: nowrap;
 }
 
-.gemini-pill[hidden] {
+.gemini-pill[hidden],
+.espresso-pill[hidden] {
   display: none;
+}
+
+.espresso-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #8f5700;
+  background: linear-gradient(135deg, #fef7e0 0%, #fde293 100%);
+  border: 1px solid #fbbc04;
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
 }
 
 .gemini-icon {
@@ -1237,28 +1253,28 @@ button:disabled {
     width: 100%;
     flex-wrap: nowrap;
     justify-content: space-between;
-    gap: 6px;
+    gap: 4px;
   }
 
   .mode-switch {
     flex: 1 1 auto;
-    max-width: 190px;
+    max-width: 156px;
   }
 
   .mode-switch-btn {
     flex: 1;
     min-inline-size: 0;
-    min-block-size: 36px;
-    padding: 4px 10px;
-    font-size: 0.78rem;
+    min-block-size: 34px;
+    padding: 4px 8px;
+    font-size: 0.74rem;
   }
 
   .tool-btn {
     padding: 0;
-    width: 40px;
-    height: 40px;
-    min-block-size: 40px;
-    min-inline-size: 40px;
+    width: 36px;
+    height: 36px;
+    min-block-size: 36px;
+    min-inline-size: 36px;
     justify-content: center;
     flex: none;
   }

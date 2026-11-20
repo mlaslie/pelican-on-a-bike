@@ -2,15 +2,22 @@
   'use strict';
 
   const STORAGE_KEY = 'pelicanBikeMuted';
+  const MUSIC_STORAGE_KEY = 'pelicanBikeMusic';
   const AudioCtx = global.AudioContext || global.webkitAudioContext;
 
   let ctx = null;
   let muted = false;
+  let musicEnabled = true;
 
   try {
     muted = global.localStorage.getItem(STORAGE_KEY) === 'true';
+    const storedMusic = global.localStorage.getItem(MUSIC_STORAGE_KEY);
+    if (storedMusic === 'false') {
+      musicEnabled = false;
+    }
   } catch (_) {
     muted = false;
+    musicEnabled = true;
   }
 
   function ensureContext() {
@@ -35,8 +42,28 @@
     } catch (_) {}
     if (muted) {
       stopEndingMusic();
+      stopRidingMusic();
     }
     return muted;
+  }
+
+  function isMusicEnabled() {
+    return musicEnabled;
+  }
+
+  function setMusicEnabled(enabled) {
+    musicEnabled = Boolean(enabled);
+    try {
+      global.localStorage.setItem(MUSIC_STORAGE_KEY, String(musicEnabled));
+    } catch (_) {}
+    if (!musicEnabled) {
+      stopRidingMusic();
+    }
+    return musicEnabled;
+  }
+
+  function toggleMusic() {
+    return setMusicEnabled(!musicEnabled);
   }
 
   function toggleMute() {
@@ -552,6 +579,7 @@
   }
 
   function playAtariEndingMusic() {
+    stopRidingMusic();
     stopEndingMusic();
     const ac = ensureContext();
     if (!ac) return;
@@ -569,11 +597,152 @@
     loop();
   }
 
+  function playCloseCall() {
+    const ac = ensureContext();
+    if (!ac) return;
+    const now = ac.currentTime;
+    const notes = [880, 1318.51];
+    for (let i = 0; i < notes.length; i++) {
+      const start = now + i * 0.045;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(notes[i], start);
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.06, start + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.11);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(start);
+      osc.stop(start + 0.12);
+    }
+  }
+
+  function playEspresso() {
+    const ac = ensureContext();
+    if (!ac) return;
+    const now = ac.currentTime;
+    const notes = [440, 554.37, 659.25, 880, 1108.73];
+    for (let i = 0; i < notes.length; i++) {
+      const start = now + i * 0.042;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(notes[i], start);
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.095, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.start(start);
+      osc.stop(start + 0.17);
+    }
+  }
+
+  // Upbeat tempo-adaptive 8-bit cycling soundtrack (speeds up as Googler accelerates!)
+  let ridingTimer = null;
+  let ridingNodes = [];
+  let ridingStepIdx = 0;
+  let ridingSpeedProvider = null;
+
+  const RIDE_MELODY = [
+    523.25, 0, 659.25, 587.33, 523.25, 0, 392.0, 0,
+    440.0, 0, 523.25, 587.33, 659.25, 0, 587.33, 0,
+    523.25, 0, 659.25, 783.99, 880.0, 0, 783.99, 659.25,
+    587.33, 0, 659.25, 523.25, 392.0, 0, 0, 0
+  ];
+  const RIDE_BASS = [
+    130.81, 0, 196.0, 0, 130.81, 0, 196.0, 0,
+    174.61, 0, 220.0, 0, 196.0, 0, 146.83, 0,
+    130.81, 0, 196.0, 0, 220.0, 0, 164.81, 0,
+    174.61, 0, 196.0, 0, 130.81, 0, 196.0, 0
+  ];
+
+  function stopRidingMusic() {
+    if (ridingTimer !== null) {
+      global.clearTimeout(ridingTimer);
+      ridingTimer = null;
+    }
+    for (let i = 0; i < ridingNodes.length; i++) {
+      try { ridingNodes[i].stop(); } catch (_) {}
+      try { ridingNodes[i].disconnect(); } catch (_) {}
+    }
+    ridingNodes = [];
+  }
+
+  function startRidingMusic(getSpeedFn) {
+    ridingSpeedProvider = typeof getSpeedFn === 'function' ? getSpeedFn : null;
+    if (muted || !musicEnabled) return;
+    if (ridingTimer !== null) return; // already playing
+    const ac = ensureContext();
+    if (!ac) return;
+
+    function tickStep() {
+      if (muted || !musicEnabled) {
+        stopRidingMusic();
+        return;
+      }
+      const acNow = ensureContext();
+      if (!acNow) {
+        stopRidingMusic();
+        return;
+      }
+      const spd = ridingSpeedProvider ? ridingSpeedProvider() : 380;
+      const spdFactor = Math.max(0, Math.min(1, (spd - 370) / 380));
+      const stepDur = 0.145 - spdFactor * 0.04; // 0.145s -> 0.105s as Googler speeds up!
+
+      const idx = ridingStepIdx % RIDE_MELODY.length;
+      ridingStepIdx = (ridingStepIdx + 1) % RIDE_MELODY.length;
+
+      const t0 = acNow.currentTime + 0.015;
+      ridingNodes = [];
+
+      const mFreq = RIDE_MELODY[idx];
+      if (mFreq > 0) {
+        const osc = acNow.createOscillator();
+        const gain = acNow.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(mFreq, t0);
+        gain.gain.setValueAtTime(0.001, t0);
+        gain.gain.linearRampToValueAtTime(0.018, t0 + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + stepDur * 0.82);
+        osc.connect(gain);
+        gain.connect(acNow.destination);
+        osc.start(t0);
+        osc.stop(t0 + stepDur * 0.86);
+        ridingNodes.push(osc);
+      }
+
+      const bFreq = RIDE_BASS[idx];
+      if (bFreq > 0) {
+        const osc = acNow.createOscillator();
+        const gain = acNow.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(bFreq, t0);
+        gain.gain.setValueAtTime(0.001, t0);
+        gain.gain.linearRampToValueAtTime(0.036, t0 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t0 + stepDur * 0.9);
+        osc.connect(gain);
+        gain.connect(acNow.destination);
+        osc.start(t0);
+        osc.stop(t0 + stepDur * 0.95);
+        ridingNodes.push(osc);
+      }
+
+      ridingTimer = global.setTimeout(tickStep, Math.round(stepDur * 1000));
+    }
+
+    tickStep();
+  }
+
   global.PelicanGame = global.PelicanGame || {};
   global.PelicanGame.Audio = {
     isMuted: isMuted,
     setMuted: setMuted,
     toggleMute: toggleMute,
+    isMusicEnabled: isMusicEnabled,
+    setMusicEnabled: setMusicEnabled,
+    toggleMusic: toggleMusic,
     unlock: unlock,
     playJump: playJump,
     playDuck: playDuck,
@@ -587,6 +756,10 @@
     playBirdSquawk: playBirdSquawk,
     playRevive: playRevive,
     playRespawnUnlocked: playRespawnUnlocked,
+    playCloseCall: playCloseCall,
+    playEspresso: playEspresso,
+    startRidingMusic: startRidingMusic,
+    stopRidingMusic: stopRidingMusic,
     playAtariEndingMusic: playAtariEndingMusic,
     stopEndingMusic: stopEndingMusic
   };

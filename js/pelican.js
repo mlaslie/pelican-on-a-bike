@@ -37,7 +37,10 @@
       this.x = ANCHOR_X;
       this.touchMode = false;
       this.gravityScale = 1;
+      this.hat = 'noogler';
       this.wearsHelmet = false;
+      this.wheelieTimer = 0;
+      this.wheelieBlend = 0;
       this.reset();
     }
 
@@ -49,8 +52,18 @@
       this.gravityScale = clamp(scale || 1, 0.55, 1.3);
     }
 
+    setHat(name) {
+      this.hat = name || 'none';
+      this.wearsHelmet = this.hat === 'helmet';
+    }
+
     setHelmet(on) {
       this.wearsHelmet = Boolean(on);
+      if (on) this.hat = 'helmet';
+    }
+
+    setWheelieTimer(sec) {
+      this.wheelieTimer = Math.max(0, sec || 0);
     }
 
     reset() {
@@ -75,6 +88,8 @@
       this.justJumped = false;
       this.invincibleTimer = 0;
       this.reviveShieldTimer = 0;
+      this.wheelieTimer = 0;
+      this.wheelieBlend = 0;
     }
 
     setShieldState(invincibleTimer, reviveShieldTimer) {
@@ -212,6 +227,8 @@
 
       const targetDuck = this.ducking && this.grounded ? 1 : 0;
       this.duckAmount = lerp(this.duckAmount, targetDuck, clamp(dt * 18, 0, 1));
+      const targetWheelie = (this.wheelieTimer > 0 && this.grounded && !this.ducking) ? 1 : 0;
+      this.wheelieBlend = lerp(this.wheelieBlend, targetWheelie, clamp(dt * 12, 0, 1));
 
       let targetTilt = 0;
       if (!this.grounded) {
@@ -382,6 +399,30 @@
 
       ctx.save();
       ctx.translate(this.x, this.y);
+
+      // Golden espresso speed streaks trailing behind the bike during wheelie!
+      if (!this.crashed && this.wheelieTimer > 0) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(251, 188, 4, 0.75)';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        for (let s = 0; s < 3; s++) {
+          const sy = -14 - s * 16;
+          const sx = -10 - ((t * 180 + s * 28) % 34);
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo(sx - 18, sy);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      if (this.wheelieBlend > 0.01) {
+        ctx.translate(18, -16);
+        ctx.rotate(-0.24 * this.wheelieBlend);
+        ctx.translate(-18, 16);
+      }
+
       ctx.translate(42, -16);
       ctx.rotate(this.tilt);
       ctx.translate(-42, 16);
@@ -720,8 +761,8 @@
         ctx.stroke();
       }
 
-      // Moonshot glass space helmet bubble when riding on the Moon!
-      if (this.wearsHelmet) {
+      // Per-campus Pelican Hat / Accessory
+      if (this.hat === 'helmet' || this.wearsHelmet) {
         ctx.save();
         const hx = headX + 12;
         const hy = headY + 1;
@@ -743,6 +784,160 @@
         ctx.beginPath();
         ctx.arc(hx - 4, hy - 2, 13, 1.15 * Math.PI, 1.48 * Math.PI);
         ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'noogler') {
+        // Iconic 4-color Google Noogler propeller beanie
+        ctx.save();
+        ctx.translate(headX - 0.5, headY - 6.5);
+        const segs = [
+          { a0: Math.PI, a1: Math.PI * 1.25, col: '#4285F4' },
+          { a0: Math.PI * 1.25, a1: Math.PI * 1.5, col: '#EA4335' },
+          { a0: Math.PI * 1.5, a1: Math.PI * 1.75, col: '#FBBC04' },
+          { a0: Math.PI * 1.75, a1: Math.PI * 2, col: '#34A853' }
+        ];
+        for (let i = 0; i < segs.length; i++) {
+          ctx.fillStyle = segs[i].col;
+          ctx.beginPath();
+          ctx.moveTo(0, 1);
+          ctx.arc(0, 1, 7.5, segs[i].a0, segs[i].a1);
+          ctx.closePath();
+          ctx.fill();
+        }
+        // Spinning yellow propeller on top
+        ctx.fillStyle = '#3c4043';
+        ctx.fillRect(-1, -9.5, 2, 3.5);
+        const propW = 2 + Math.abs(Math.cos(t * 22)) * 6.5;
+        ctx.fillStyle = '#FBBC04';
+        ctx.strokeStyle = '#8f5700';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(0, -9.5, propW, 1.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'alpine') {
+        // Swiss alpine hat with red feather
+        ctx.save();
+        ctx.translate(headX - 0.5, headY - 7);
+        ctx.fillStyle = '#2e5e3e';
+        ctx.strokeStyle = '#1b3a26';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 9.5, 2.3, -0.06, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-6, 0);
+        ctx.lineTo(-3.5, -7);
+        ctx.lineTo(4.5, -6.5);
+        ctx.lineTo(6.5, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#EA4335';
+        ctx.fillRect(-5.5, -2, 11.5, 2);
+        ctx.strokeStyle = '#EA4335';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(-4, -2);
+        ctx.quadraticCurveTo(-9, -8, -7, -12);
+        ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'bowler') {
+        // Classic dapper London bowler hat
+        ctx.save();
+        ctx.translate(headX - 0.5, headY - 7);
+        ctx.fillStyle = '#202124';
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 10, 2.4, -0.05, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, 0.5, 6.8, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#EA4335';
+        ctx.fillRect(-6.5, -1.5, 13, 2);
+        ctx.restore();
+      } else if (this.hat === 'shades') {
+        // Cool NYC dark sunglasses
+        ctx.save();
+        ctx.fillStyle = '#14171a';
+        ctx.strokeStyle = '#3c4043';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(headX - 1.5, headY - 4.2, 8.5, 5, 1.5);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(headX + 0.5, headY - 3);
+        ctx.lineTo(headX + 2.5, headY - 0.5);
+        ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'headband') {
+        // Tokyo hachimaki headband with fluttering ribbons
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#dadce0';
+        ctx.lineWidth = 0.8;
+        ctx.fillRect(headX - 7.5, headY - 6.2, 14, 3.2);
+        ctx.strokeRect(headX - 7.5, headY - 6.2, 14, 3.2);
+        ctx.fillStyle = '#EA4335';
+        ctx.beginPath();
+        ctx.arc(headX + 1.5, headY - 4.6, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+        const flutter = Math.sin(t * 14) * 2.2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(headX - 7.5, headY - 5);
+        ctx.quadraticCurveTo(headX - 13, headY - 6 + flutter, headX - 17, headY - 3 + flutter);
+        ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'visor') {
+        // Glowing cyan Cloud TPU cyber-visor
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.85)';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(headX - 2, headY - 4.2, 10, 4.6, 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      } else if (this.hat === 'pixel') {
+        // Retro Chrome Dino 8-bit pixel cap
+        ctx.save();
+        ctx.fillStyle = '#535353';
+        ctx.fillRect(headX - 7, headY - 10, 12, 4);
+        ctx.fillRect(headX - 4, headY - 13, 8, 3);
+        ctx.fillRect(headX + 2, headY - 8, 8, 2.5);
+        ctx.restore();
+      } else if (this.hat === 'crown') {
+        // Gleaming Golden Crown at the End of the Earth!
+        ctx.save();
+        ctx.translate(headX - 0.5, headY - 7);
+        ctx.fillStyle = '#FBBC04';
+        ctx.strokeStyle = '#b06000';
+        ctx.lineWidth = 1.1;
+        ctx.beginPath();
+        ctx.moveTo(-6.5, 1);
+        ctx.lineTo(-7.5, -7.5);
+        ctx.lineTo(-3, -3.5);
+        ctx.lineTo(0, -9);
+        ctx.lineTo(3, -3.5);
+        ctx.lineTo(7.5, -7.5);
+        ctx.lineTo(6.5, 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        // Tiny Google-colored crown jewels
+        const jCols = ['#4285F4', '#EA4335', '#34A853'];
+        for (let j = 0; j < 3; j++) {
+          ctx.fillStyle = jCols[j];
+          ctx.beginPath();
+          ctx.arc(-3.5 + j * 3.5, -1.5, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.restore();
       }
 

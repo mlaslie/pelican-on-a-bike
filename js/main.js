@@ -18,6 +18,8 @@
     const hudScore = document.getElementById('hud-score');
     const hudGeminiPill = document.getElementById('hud-gemini-pill');
     const hudGeminiTime = document.getElementById('hud-gemini-time');
+    const hudEspressoPill = document.getElementById('hud-espresso-pill');
+    const hudEspressoTime = document.getElementById('hud-espresso-time');
     const hudGPips = Array.from(document.querySelectorAll('#hud-g-tracker .g-pip'));
     const hudContinueBadge = document.getElementById('hud-continue-badge');
     const hudContinueCount = document.getElementById('hud-continue-count');
@@ -37,6 +39,9 @@
     const btnSound = document.getElementById('btn-sound');
     const iconSoundOn = document.getElementById('icon-sound-on');
     const iconSoundOff = document.getElementById('icon-sound-off');
+    const btnMusic = document.getElementById('btn-music');
+    const iconMusicOn = document.getElementById('icon-music-on');
+    const iconMusicOff = document.getElementById('icon-music-off');
     const btnFullscreen = document.getElementById('btn-fullscreen');
     const btnExitFullscreen = document.getElementById('btn-exit-fullscreen');
     const btnFsPause = document.getElementById('btn-fs-pause');
@@ -113,6 +118,14 @@
       btnSound.setAttribute('aria-pressed', muted ? 'false' : 'true');
       iconSoundOn.hidden = muted;
       iconSoundOff.hidden = !muted;
+    }
+
+    function syncMusicButton() {
+      if (!btnMusic || !AudioMod.isMusicEnabled) return;
+      const on = AudioMod.isMusicEnabled();
+      btnMusic.setAttribute('aria-pressed', on ? 'true' : 'false');
+      iconMusicOn.hidden = !on;
+      iconMusicOff.hidden = on;
     }
 
     function syncSpeedModeButtons(mode) {
@@ -298,6 +311,14 @@
           hudGeminiTime.textContent = 'INVINCIBLE ' + invTime.toFixed(1) + 's';
         }
 
+        if (hudEspressoPill && hudEspressoTime) {
+          const espTime = hud.espressoTimer || 0;
+          hudEspressoPill.hidden = espTime <= 0;
+          if (espTime > 0) {
+            hudEspressoTime.textContent = '2× ' + espTime.toFixed(1) + 's';
+          }
+        }
+
         updateActiveCampusUI(hud.campus);
       },
       onStateChange: function (snapshot) {
@@ -328,6 +349,7 @@
 
     global.PelicanGame.instance = engine;
     syncSoundButton();
+    syncMusicButton();
     syncSpeedModeButtons(engine.speedMode);
 
     // Capability-based mobile / touch detection (prefers pointer/hover media queries over brittle UA strings)
@@ -459,8 +481,20 @@
     btnSound.addEventListener('click', function (e) {
       AudioMod.toggleMute();
       syncSoundButton();
+      engine.syncRidingMusic();
       if (e.detail > 0) canvas.focus();
     });
+
+    if (btnMusic) {
+      btnMusic.addEventListener('click', function (e) {
+        if (AudioMod.toggleMusic) {
+          AudioMod.toggleMusic();
+          syncMusicButton();
+          engine.syncRidingMusic();
+        }
+        if (e.detail > 0) canvas.focus();
+      });
+    }
 
     btnStartTour.addEventListener('click', function () {
       engine.startTour('sydney');
@@ -638,6 +672,17 @@
         e.preventDefault();
         AudioMod.toggleMute();
         syncSoundButton();
+        engine.syncRidingMusic();
+        return;
+      }
+
+      if (code === 'KeyN') {
+        e.preventDefault();
+        if (AudioMod.toggleMusic) {
+          AudioMod.toggleMusic();
+          syncMusicButton();
+          engine.syncRidingMusic();
+        }
         return;
       }
 
