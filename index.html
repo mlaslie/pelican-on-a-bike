@@ -155,19 +155,49 @@
           ></canvas>
 
           <div id="overlay-start" class="stage-overlay">
-            <div class="overlay-card overlay-card-compact">
+            <div class="overlay-card overlay-card-start">
               <p class="overlay-kicker">CHROME DINO // 6-CAMPUS GAUNTLET</p>
               <h2 class="overlay-title">Ready to pedal the World Tour?</h2>
-              <p class="overlay-desc">
-                Race across 6 Google campuses from <strong>Sydney (Easy)</strong> to <strong>Mountain View (Hardest)</strong>. Grab <strong>Gemini sparkles</strong> for 6s invincibility and stack <strong>3× Google G logos</strong> to unlock Respawns.
-              </p>
+
+              <div class="start-guide" aria-label="How to play">
+                <div id="start-controls-desktop" class="start-controls-bar">
+                  <span class="guide-chip"><kbd>Space</kbd> / <kbd>↑</kbd> <strong>Jump</strong></span>
+                  <span class="guide-chip"><kbd>↓</kbd> <strong>Duck &amp; Fast-fall</strong></span>
+                  <span class="guide-chip"><kbd>F</kbd> <strong>Full Screen</strong></span>
+                </div>
+                <div id="start-controls-touch" class="start-controls-bar">
+                  <span class="guide-chip"><strong>Jump:</strong> Tap ↑ or right side</span>
+                  <span class="guide-chip"><strong>Duck:</strong> Hold ↓, left side, or swipe ↓</span>
+                </div>
+
+                <div class="start-powerups-grid">
+                  <div class="powerup-guide-item">
+                    <span class="guide-icon guide-icon-gemini" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M12 2 Q12 12 22 12 Q12 12 12 22 Q12 12 2 12 Q12 12 12 2 Z" fill="currentColor"/>
+                      </svg>
+                    </span>
+                    <span class="guide-text">
+                      <strong>Gemini Sparkle</strong>
+                      <span>6s invincibility — smash obstacles</span>
+                    </span>
+                  </div>
+
+                  <div class="powerup-guide-item">
+                    <span class="guide-icon guide-icon-g" aria-hidden="true">G</span>
+                    <span class="guide-text">
+                      <strong>3× Google G</strong>
+                      <span>Unlock stackable Respawns</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               <div class="overlay-actions">
                 <button id="btn-start-tour" type="button" class="primary-btn">
                   Start Tour <kbd class="btn-kbd" aria-hidden="true">Space</kbd>
                 </button>
               </div>
-              <p id="start-hint-desktop" class="overlay-hint">Press Space, Up Arrow, or click canvas to ride</p>
-              <p id="start-hint-touch" class="overlay-hint">Tap right side to jump · Hold left or swipe ↓ to duck</p>
             </div>
           </div>
 
