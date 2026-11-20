@@ -417,6 +417,45 @@
     triggerBellRing(ac, now + 0.25, 0.28);
   }
 
+  // Classic joyful 1-UP / Respawn Unlocked arcade fanfare (E5-G5-E6-C6-D6-G6)
+  function playRespawnUnlocked() {
+    const ac = ensureContext();
+    if (!ac) return;
+    const now = ac.currentTime;
+    const notes = [659.25, 783.99, 1318.51, 1046.5, 1174.66, 1567.98];
+
+    for (let i = 0; i < notes.length; i++) {
+      const start = now + i * 0.068;
+      const dur = i === notes.length - 1 ? 0.28 : 0.11;
+      const osc = ac.createOscillator();
+      const harm = ac.createOscillator();
+      const gain = ac.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(notes[i], start);
+      harm.type = 'sine';
+      harm.frequency.setValueAtTime(notes[i] * 2, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.11, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+      const hGain = ac.createGain();
+      hGain.gain.setValueAtTime(0.032, start);
+      hGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+      osc.connect(gain);
+      harm.connect(hGain);
+      gain.connect(ac.destination);
+      hGain.connect(ac.destination);
+
+      osc.start(start);
+      harm.start(start);
+      osc.stop(start + dur + 0.015);
+      harm.stop(start + dur + 0.015);
+    }
+  }
+
   // Retro Atari / 8-bit arcade victory chiptune loop for End of the Earth
   let endingTimer = null;
   let endingNodes = [];
@@ -547,6 +586,7 @@
     playObstacleSmash: playObstacleSmash,
     playBirdSquawk: playBirdSquawk,
     playRevive: playRevive,
+    playRespawnUnlocked: playRespawnUnlocked,
     playAtariEndingMusic: playAtariEndingMusic,
     stopEndingMusic: stopEndingMusic
   };

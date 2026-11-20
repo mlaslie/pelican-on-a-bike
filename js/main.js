@@ -20,6 +20,7 @@
     const hudGeminiTime = document.getElementById('hud-gemini-time');
     const hudGPips = Array.from(document.querySelectorAll('#hud-g-tracker .g-pip'));
     const hudContinueBadge = document.getElementById('hud-continue-badge');
+    const hudContinueCount = document.getElementById('hud-continue-count');
     const tourProgressEl = document.getElementById('tour-progress');
     const tourProgressFill = document.getElementById('tour-progress-fill');
     const routeStops = Array.from(document.querySelectorAll('.route-stop[data-stop]'));
@@ -283,7 +284,12 @@
         const continues = hud.freeContinues || 0;
         hudContinueBadge.hidden = continues <= 0;
         if (continues > 0) {
-          hudContinueBadge.textContent = 'RESPAWNS ×' + continues;
+          if (hudContinueCount) {
+            hudContinueCount.textContent = '×' + continues;
+          } else {
+            hudContinueBadge.textContent = '↻ ×' + continues;
+          }
+          hudContinueBadge.setAttribute('aria-label', continues + (continues === 1 ? ' respawn available' : ' respawns available'));
         }
 
         const invTime = hud.invincibleTimer || 0;
@@ -311,6 +317,11 @@
           announce('Gemini invincibility active for 6 seconds.');
         } else if (type === 'google-g') {
           announce('Google G collected, ' + value + ' of 3.');
+        } else if (type === 'continue-unlocked') {
+          hudContinueBadge.classList.remove('respawn-pop');
+          void hudContinueBadge.offsetWidth;
+          hudContinueBadge.classList.add('respawn-pop');
+          announce('Respawn unlocked! ' + value + ' respawns ready.');
         }
       }
     });

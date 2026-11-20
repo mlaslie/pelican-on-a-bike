@@ -773,20 +773,25 @@
           if (this.gCount >= 3) {
             this.gCount = 0;
             this.freeContinues += 1;
-            this.Audio.playCollectG(3);
-            this.spawnConfetti(42);
+            if (this.Audio.playRespawnUnlocked) {
+              this.Audio.playRespawnUnlocked();
+            } else {
+              this.Audio.playCollectG(3);
+            }
+            this.spawnConfetti(36);
             this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 38, 18, ['#4285F4', '#EA4335', '#FBBC04', '#34A853']);
-            this.state = 'respawn-unlocked';
-            this.respawnSplashTimestamp = performance.now();
-            this.pelican.setDuck(false);
-            this.pelican.releaseJump();
-            this.pelican.setShieldState(this.invincibleTimer, this.reviveShieldTimer);
+            this.toast = {
+              kicker: 'RESPAWN UNLOCKED!',
+              title: '↻ ×' + this.freeContinues + ' READY IN HUD',
+              color: '#34A853',
+              timer: 2.3,
+              duration: 2.3
+            };
             if (this.callbacks.onPowerup) {
               this.callbacks.onPowerup('continue-unlocked', this.freeContinues);
             }
             this.emitHud(true);
-            this.emitState();
-            return;
+            continue;
           }
           this.Audio.playCollectG(this.gCount);
           this.spawnSparkles(this.pelican.x + 48, this.pelican.y - 38, 10, ['#4285F4', '#EA4335', '#FBBC04', '#34A853']);
